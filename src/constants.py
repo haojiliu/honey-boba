@@ -1,0 +1,27 @@
+BASE_DIR = '/Users/haojiliu/src/design_review/'
+UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
+
+THUMBNAIL_FOLDER = '/static/thumbnail/designs'
+THUMBNAIL_FULL_DIR = BASE_DIR + 'src/static/thumbnail/designs'
+
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+FORMAT_JPEG = 'jpg'
+
+SIZE_CODE_LARGE = 0
+SIZE_CODE_MEDIUM = 1
+
+THUMBNAIL_SIZES = {
+  (1024, 1024): SIZE_CODE_LARGE,
+  (512, 512): SIZE_CODE_MEDIUM
+}
+
+MAX_FILE_SIZE = 16 * 1024 * 1024 # 16MB
+
+MIN_LEN_REVIEW = 32
+
+CONST_FLAGS_DELETED = 1 << 3
+CONST_FLAGS_INACTIVE = 1 << 2
+CONST_FLAGS_ACTIVE = 0
+
+CONST_SKU_PREFIX_DEFAULT = 'ABC'

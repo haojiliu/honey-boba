@@ -1,0 +1,12 @@
+version: "3"
+# Author: Haoji Liu
+services:
+  app:
+    volumes:
+      - ./src:/srv/src
+    build: .
+    container_name: design_review
+    ports:
+      - "5000:5000" # for app
+      - "9002:9002" # for supervisord
+    tty: true

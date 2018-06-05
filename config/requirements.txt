@@ -1,0 +1,7 @@
+flask
+requests
+sqlalchemy
+simplejson
+Flask-PyMongo
+uwsgi
+Pillow

@@ -1,3 +1,7 @@
+# Haoji
+uploaded_files/
+src/static/thumbnail/designs/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

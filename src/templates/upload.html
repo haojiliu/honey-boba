@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+<p>Not sure what to upload? No problem! <a class="btn btn-primary" href="/designs" role="button">See Other Designs</a></p>
+<h1>Upload new File</h1>
+<form method=post enctype=multipart/form-data>
+  <div class="form-group">
+    <input type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
+    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people reply to this design</small>
+  </div>
+  <div class="form-group">
+    <input type="file" name="file" class="form-control-file" id="fileField" aria-describedby="uploadHelp">
+    <small id="uploadHelp" class="form-text text-muted">Make sure you upload a .jpg or .pdf file.</small>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
