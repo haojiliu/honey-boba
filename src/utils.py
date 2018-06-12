@@ -1,7 +1,10 @@
 # Haoji Liu
-import os, sys
+import os, sys, datetime, time
 from PIL import Image
 import constants
+
+def epoch_to_datetime_string(epoch_time):
+  return datetime.datetime.fromtimestamp(int(float(epoch_time))).strftime("%Y-%m-%d %H:%M:%S")
 
 def sanitize_user_input(user_input):
   return user_input
@@ -13,8 +16,9 @@ def color_conversion(im):
   return im
 
 def build_thumbnail_filepath(uri, filename):
-  fdir = os.path.join(constants.THUMBNAIL_FOLDER, uri)
-  return os.path.join(fdir, filename)
+  # fdir = os.path.join(constants.THUMBNAIL_FOLDER, uri)
+  # return os.path.join(fdir, filename)
+  return '/api/thumbnail/' + uri
 
 def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
   width, height = size_tuple
@@ -39,11 +43,11 @@ def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
     raise
     print("cannot create thumbnail for %s" % input_filepath)
 
-def generate_randome_string(size):
+def generate_random_string(size):
   return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(size))
 
 def sku_generator(prefix=None):
-  generated_parts = [generate_randome_string(3), generate_randome_string(3)]
+  generated_parts = [generate_random_string(3), generate_random_string(3)]
   if prefix:
     return '-'.join([prefix, '-'.join(generated_parts)])
   else:
