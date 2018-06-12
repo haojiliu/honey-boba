@@ -1,5 +1,5 @@
 from datetime import date
-import time
+import time, datetime
 
 from model import Notification, Review, ReviewObject, Thumbnail
 
@@ -8,12 +8,29 @@ import utils
 import constants
 
 def thumbnail(input_filepath, uri):
-  for size_tuple in constants.THUMBNAIL_SIZES:
-    size_code = constants.THUMBNAIL_SIZES[size_tuple]
+  for size_tuple in constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE:
+    size_code = constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE[size_tuple]
     filename = utils.thumbnail(input_filepath, uri, size_tuple)
     touch_thumbnail(uri, filename, size_code)
 
-def get_designs(uris=None):
+def get_reviews(uris=None):
+  try:
+    context = []
+    with create_session() as s:
+      reviews = _get_reviews(s, uris=uris)
+      for review in reviews:
+        new_review = {
+          'body': review.body,
+          'timestamp': review.created_at_utc
+        }
+        context.append(new_review)
+    print(context)
+    return context
+  except:
+    raise
+    return 'Failed'
+
+def get_all_active_designs(uris=None):
   """This is the api endpoint to get all related information for designs
   i.e, reviews, thumbnail image links, user info, upvotes, etc.
 
@@ -24,18 +41,20 @@ def get_designs(uris=None):
     with create_session() as s:
       designs = _get_review_objects(s, uris=uris)
       for design in designs:
+        print(design.updated_at_utc)
         new_design = {
           'uri': design.uri,
+          'updated_at_utc': utils.epoch_to_datetime_string(design.updated_at_utc),
           'reviews': []
         }
         for review in design.reviews:
           new_design['reviews'].append({
             'body': review.body,
-            'timestamp': review.created_at_utc
+            'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
           })
         for thumbnail in design.thumbnails:
           if thumbnail.size_code == constants.SIZE_CODE_LARGE:
-            new_design['thumbnail_filepath'] = utils.build_thumbnail_filepath(
+            new_design['thumbnail_uri'] = utils.build_thumbnail_filepath(
                 thumbnail.review_object_uri, thumbnail.filename)
         context.append(new_design)
     print(context)
@@ -52,13 +71,10 @@ def create_a_review(review_object_uri, body, email=None):
       o = Review()
       o.review_object_uri = review_object_uri
       o.body = body
-      if email:
-        # TODO: link the user to the review
-        pass
       # touch time
       o.updated_at_utc = time.time()
       s.add(o)
-    return 'touch thumbnail succeeded'
+    return 'adding a new review succeeded'
   except:
     raise
     return 'Failed'
@@ -118,12 +134,20 @@ def _get_review_objects(session, uris):
     q = q.filter(ReviewObject.uri.in_(uris))
   return q.all()
 
+def _get_reviews(session, uris):
+  """Return a list of ReviewObject"""
+  q = session.query(Review)
+  if uris:
+    q = q.filter(Review.review_object_uri.in_(uris))
+  return q.all()
+
 def get_review_objects(uris=None):
   """Return a list of ReviewObject object in strings"""
   with create_session() as s:
     return _get_review_objects(s, uris)
 
 def delete_review_objects(uris):
+  return 'fake deleted'
   try:
     with create_session() as s:
       for o in _get_review_objects(s, uris):

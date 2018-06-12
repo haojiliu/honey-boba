@@ -1,4 +1,4 @@
-BASE_DIR = '/Users/haojiliu/src/design_review/'
+BASE_DIR = '/Users/haojiliu/src/honey-boba/'
 UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
 
 THUMBNAIL_FOLDER = '/static/thumbnail/designs'
@@ -11,7 +11,7 @@ FORMAT_JPEG = 'jpg'
 SIZE_CODE_LARGE = 0
 SIZE_CODE_MEDIUM = 1
 
-THUMBNAIL_SIZES = {
+THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE = {
   (1024, 1024): SIZE_CODE_LARGE,
   (512, 512): SIZE_CODE_MEDIUM
 }
