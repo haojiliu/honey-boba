@@ -1,7 +1,8 @@
 # honey-boba
 
 # TODOs:
-- add google recaptcha
+- figure out why server side can't verify a recaptcha response, always return false
+
 - responsive resizing of text
 - custom validation message
 - report a bug form on /faq page

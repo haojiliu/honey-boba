@@ -25,6 +25,24 @@ app.config['MAX_CONTENT_LENGTH'] = constants.MAX_FILE_SIZE
 app.config['UPLOAD_FOLDER'] = constants.UPLOAD_FOLDER
 app.secret_key = b'(D*@SK+2309_jvoe)\n\xec]/'
 
+def recaptcha():
+  """
+  Returns: bool, True if usr is not a robot per Google's analysis
+  """
+  user_ip = request.environ['REMOTE_ADDR']
+  user_browser = request.headers['User-Agent']
+  g_recaptcha_response = request.form.get('g-recaptcha-response')
+  print(user_ip)
+  print(user_browser)
+  g_recaptcha_post_data = {
+    'secret': constants.CONST_GOOGLE_RECAPTCHA_SECRET_KEY,
+    'response': g_recaptcha_response}
+  print(g_recaptcha_response)
+  r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=g_recaptcha_post_data)
+  print(r.json())
+  is_g_recaptcha_verified = r.json().get('success', False)
+  return is_g_recaptcha_verified
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -63,6 +81,8 @@ def api_review(uri):
 @app.route('/api/review', methods=['POST'])
 def api_review_post():
   if request.method == 'POST':
+    recaptcha()
+    return ''
     error_msg = ''
     review_text = request.form.get('reviewText')
     uri = request.form.get('uri')
