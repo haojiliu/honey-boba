@@ -21,10 +21,9 @@ def get_reviews(uris=None):
       for review in reviews:
         new_review = {
           'body': review.body,
-          'timestamp': review.created_at_utc
+          'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
         }
         context.append(new_review)
-    print(context)
     return context
   except:
     raise
@@ -41,7 +40,6 @@ def get_all_active_designs(uris=None):
     with create_session() as s:
       designs = _get_review_objects(s, uris=uris)
       for design in designs:
-        print(design.updated_at_utc)
         new_design = {
           'uri': design.uri,
           'updated_at_utc': utils.epoch_to_datetime_string(design.updated_at_utc),
@@ -52,6 +50,7 @@ def get_all_active_designs(uris=None):
             'body': review.body,
             'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
           })
+        new_design['reviews'].reverse()
         for thumbnail in design.thumbnails:
           if thumbnail.size_code == constants.SIZE_CODE_LARGE:
             new_design['thumbnail_uri'] = utils.build_thumbnail_filepath(
@@ -67,17 +66,18 @@ def create_a_review(review_object_uri, body, email=None):
   try:
     with create_session() as s:
       r = _get_review_objects(s, [review_object_uri])
-      assert r, 'Invalid review object uri'
+      if not r:
+        return 'Invalid review object uri'
       o = Review()
       o.review_object_uri = review_object_uri
       o.body = body
       # touch time
       o.updated_at_utc = time.time()
       s.add(o)
-    return 'adding a new review succeeded'
+    return ''
   except:
     raise
-    return 'Failed'
+    return 'Post a review failed'
 
 def touch_thumbnail(review_object_uri, filename, size_code):
   try:
@@ -130,6 +130,7 @@ def _get_thumbnail(session, review_object_uris=None, filenames=None):
 def _get_review_objects(session, uris):
   """Return a list of ReviewObject"""
   q = session.query(ReviewObject)
+  q = q.filter(ReviewObject.flags == constants.CONST_FLAGS_ACTIVE)
   if uris:
     q = q.filter(ReviewObject.uri.in_(uris))
   return q.all()
@@ -139,6 +140,8 @@ def _get_reviews(session, uris):
   q = session.query(Review)
   if uris:
     q = q.filter(Review.review_object_uri.in_(uris))
+    q = q.order_by(Review.id.desc())
+
   return q.all()
 
 def get_review_objects(uris=None):
@@ -147,12 +150,26 @@ def get_review_objects(uris=None):
     return _get_review_objects(s, uris)
 
 def delete_review_objects(uris):
-  return 'fake deleted'
   try:
     with create_session() as s:
       for o in _get_review_objects(s, uris):
-        s.delete(o)
+        if o.flags == constants.CONST_FLAGS_INACTIVE:
+          return 'Design already deleted'
+        o.flags = o.flags | constants.CONST_FLAGS_INACTIVE
   except:
     raise
     return 'Delete failed'
-  return 'Deleted'
+  return ''
+
+def report_review_objects(uris):
+  try:
+    with create_session() as s:
+      for o in _get_review_objects(s, uris):
+        if o.flags & constants.CONST_FLAGS_REPORTED:
+          return 'Design already reported'
+        o.flags = o.flags | constants.CONST_FLAGS_INACTIVE
+        o.flags = o.flags | constants.CONST_FLAGS_REPORTED
+  except:
+    raise
+    return 'Report failed'
+  return ''

@@ -1,22 +1,31 @@
 <template>
   <div class="card card-body mx-auto d-block">
     <div class="row d-flex align-items-top">
-      <div class="col-12">
-        <h4 v-if="this.$route.params.uri">Update it</h4>
+      <div v-if="this.$route.params.uri" class="col-12">
+        <h4>Update it</h4>
+      </div>
+      <div v-if="!this.$route.params.uri" class="col-12">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people reply to this thread</small>
       </div>
     </div>
     <div v-if="!this.$route.params.uri" class="row d-flex align-items-top">
-      <div class="col-12">
-        <input v-model="email" type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
-        <small id="emailHelp" class="text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people reply to this design</small>
+      <div class="col-12 mb-2">
+        <input v-model="email" v-validate="'required|email'" type="email" name="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
+        <small class="text-danger">{{ errors.first('email') }}</small>
       </div>
     </div>
     <div class="row d-flex align-items-top">
-      <div class="col-12">
-        <input type="file" ref="file" v-on:change="handleFileUpload" class="form-control-file" id="file" aria-describedby="uploadHelp">
-        <small id="uploadHelp" class="form-text text-muted">Make sure you upload a .jpg or .pdf file.</small>
+      <div class="col-12 mb-2">
+        <small id="uploadHelp" class="form-text text-muted">Make sure you upload a .jpg or .png file.</small>
+        <input v-validate="{required: true, image: true, size: 10240}" type="file" name="file" ref="file" v-on:change="handleFileUpload" class="form-control-file" aria-describedby="uploadHelp">
+        <small class="text-danger">{{ errors.first('file') }}</small>
       </div>
-      <button class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
+      <div class="col-12">
+        <button class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
+        <div v-if="lastUploadAt">
+          <p class="float-right text-success">Last uploaded at: {{lastUploadAt}}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -35,7 +44,8 @@ export default {
   data () {
     return {
       file: null,
-      email: ''
+      email: '',
+      lastUploadAt: ''
     }
   },
   methods: {
@@ -47,18 +57,26 @@ export default {
       return formData
     },
     uploadFile () {
-      var formData = this._prepareFormData()
-      axios.post('/api/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+      this.$validator.validate().then(result => {
+        if (!result) {
+          // do stuff if not valid.
+        } else {
+          var formData = this._prepareFormData()
+          var that = this
+          axios.post('/api/upload',
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+          ).then(function (resp) {
+            that.lastUploadAt = new Date(Date.now())
+            console.log(resp.data)
+          }).catch(function (resp) {
+            console.log('FAILURE!!')
+          })
         }
-      ).then(function (resp) {
-        console.log(resp.data)
-      }).catch(function (resp) {
-        console.log('FAILURE!!')
       })
     },
 

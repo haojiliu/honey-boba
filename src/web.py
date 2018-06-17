@@ -39,9 +39,10 @@ def api_designs():
 @app.route('/api/design/<uri>', methods=['GET'])
 def api_design(uri):
   """Returns: dict"""
-  designs = l.get_all_active_designs(uris=[uri,])
-  assert len(designs) == 1
-  return jsonify(designs[0])
+  designs = l.get_all_active_designs(uris=[uri])
+  assert len(designs) <= 1
+  design = designs[0] if designs else {}
+  return jsonify(design)
 
 @app.route('/api/thumbnail/<uri>', methods=['GET'])
 def api_thumbnail(uri):
@@ -54,17 +55,26 @@ def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in constants.ALLOWED_EXTENSIONS
 
-@app.route('/api/review', methods=['GET','POST'])
-def api_review():
+@app.route('/api/review/<uri>', methods=['GET'])
+def api_review(uri):
+  reviews = l.get_reviews(uris=[uri])
+  return jsonify(reviews)
+
+@app.route('/api/review', methods=['POST'])
+def api_review_post():
   if request.method == 'POST':
+    error_msg = ''
     review_text = request.form.get('reviewText')
     uri = request.form.get('uri')
     sanitized_review_text = utils.sanitize_user_input(review_text)
     if len(sanitized_review_text) < constants.MIN_LEN_REVIEW:
-      return 'Your review is too short! Sure you can suggest more!'
+      error_msg = 'Your review is too short! Sure you can suggest more!'
     else:
-      l.create_a_review(uri, sanitized_review_text)
-      return 'Your review "%s" was posted' % sanitized_review_text
+      error_msg = l.create_a_review(uri, sanitized_review_text)
+    return jsonify({
+      'status': 0 if not error_msg else 1,
+      'error_msg': error_msg
+    })
 
 def file_upload_sanity_check(uri):
   """
@@ -146,10 +156,22 @@ def api_delete():
   print(uri)
   error_msg = l.delete_review_objects(uris=[uri])
   return jsonify({
-    'status': 0,
+    'status': 0 if not error_msg else 1,
     'error_msg': error_msg
   })
 
+@app.route('/api/report', methods=['POST'])
+def api_report():
+  """
+  This is the endpoint to report an inappropriate design
+  """
+  uri = request.form.get('uri')
+  print(uri)
+  error_msg = l.report_review_objects(uris=[uri])
+  return jsonify({
+    'status': 0 if not error_msg else 1,
+    'error_msg': error_msg
+  })
 if __name__ == '__main__':
   if len(sys.argv) == 2:
     p = sys.argv[1]

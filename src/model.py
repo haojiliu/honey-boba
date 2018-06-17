@@ -36,7 +36,7 @@ class ReviewObject(Base):
   id = Column(Integer, primary_key=True)
   uri = Column(String(250), nullable=False)
   uid = Column(Integer, ForeignKey("user.id"), nullable=True)
-  flags = Column(Integer, nullable=True)
+  flags = Column(Integer, nullable=False)
   filename = Column(String(250), nullable=False)
   description = Column(String(250), nullable=True)
   created_at_utc = Column(String(250), nullable=False)
@@ -47,6 +47,7 @@ class ReviewObject(Base):
 
   def __init__(self):
     self.created_at_utc = time.time()
+    self.flags = constants.CONST_FLAGS_ACTIVE
 
   def to_string(self):
     d = dict(self.__dict__)

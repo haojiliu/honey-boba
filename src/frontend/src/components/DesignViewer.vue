@@ -1,8 +1,7 @@
 <template>
   <div>
     <div class="card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
-      <img class="card-img-top" v-bind:src="designJson.thumbnail_uri">
-      <p class="text-muted text-right">Last updated at {{designJson.updated_at_utc}}</p>
+      <design-item v-bind:designJson="designJson"></design-item>
       <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
       <new-review v-bind:uri="designJson.uri"></new-review>
     </div>
@@ -12,11 +11,13 @@
 /* eslint-disable */
 import ReviewWidget from './ReviewWidget'
 import NewReview from './NewReview'
+import DesignItem from './DesignItem'
 
 export default {
   components: {
     ReviewWidget,
-    NewReview
+    NewReview,
+    DesignItem
   },
   computed: {
     designsJson () {

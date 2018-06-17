@@ -1,11 +1,20 @@
 # honey-boba
 
 # TODOs:
-- all api responses should include a 'status' field
-- front end user input validation instead of checking on the server side
+- add google recaptcha
+- responsive resizing of text
+- custom validation message
+- report a bug form on /faq page
+- show error message when server side failed?
+
+- upload the same file again
+- upload the same form again
+- upload the same review again
+- upload a new file doesn't show up, probably cached somewhere
+
+- implement lazyloading
 - move getter methods from logic to model
-- make delete design work
-- think about filtering inactive/active designs/reviews
+
 
 dribbble:
 1, amateur works are deranked to the bottom or not showing up at all.

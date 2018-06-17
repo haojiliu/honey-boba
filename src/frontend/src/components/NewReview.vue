@@ -1,20 +1,24 @@
 <template>
   <div>
-    <div>
-      <!-- <input type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email to receive updates"> -->
-      <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people reply to this thread</small> -->
-    </div>
-    <div id="newReview">
-      <div class="input-group mb-3">
-        <textarea v-model="reviewText" class="form-control newReviewText" name="reviewText" rows="1" placeholder="Help Each Other!"></textarea>
+    <form id="newReview">
+      <div class="input-group">
+        <!-- <textarea v-validate="'required|min:6'" name="reviewText" v-model="reviewText" ref="reviewText" class="form-control" rows="1" placeholder="Constructive reviews do the most help!"></textarea> -->
+        <textarea-autosize
+          v-validate="'required|min:10'"
+          name="reviewText"
+          rows="1"
+          placeholder="Share your thoughts"
+          class="form-control"
+          ref="reviewText"
+          v-model="reviewText"
+          :max-height="350"
+        ></textarea-autosize>
         <div class="input-group-append">
-          <button @click="submitReview" class="btn btn-secondary" type="button">Send</button>
+          <button @click="onSubmit" class="btn btn-outline-dark" type="button">Send</button>
         </div>
       </div>
-      <div>
-        <small id="newReviewHelp" class="form-text text-muted text-right">Constructive reviews do the most help!</small>
-      </div>
-    </div>
+      <small class="text-danger">{{ errors.first('reviewText') }}</small>
+    </form>
   </div>
 </template>
 <script>
@@ -33,22 +37,35 @@ export default {
       formData.append('uri', this.uri)
       return formData
     },
-    submitReview () {
-      var formData = this._prepareFormData()
-      axios.post('/api/review',
-        formData
-      ).then(function (resp) {
-        console.log(resp.data)
-        console.log('post review succeeded')
-      }).catch(function (resp) {
-        console.log('FAILURE!!')
+    onSubmit () {
+      var that = this
+      this.$validator.validate().then(result => {
+        if (!result) {
+          // do stuff if not valid.
+        } else {
+          var formData = this._prepareFormData()
+          axios.post('/api/review',
+            formData
+          ).then(function (resp) {
+            that.$store.dispatch('designs/refreshOneReview', that.uri)
+            that.reviewText = ''
+            console.log(resp.data)
+            console.log('post review succeeded')
+          }).catch(function (resp) {
+            console.log('FAILURE!!')
+          })
+        }
       })
     }
   }
 }
 </script>
 <style strict>
-#newReview{
-  margin-top: 10px;
+textarea.form-control {
+  border-left: none;
+  border-top: none;
+}
+#newReview {
+  padding-top: 5px;
 }
 </style>

@@ -4,6 +4,14 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import VeeValidate from 'vee-validate'
+import VueTextareaAutosize from 'vue-textarea-autosize'
+
+Vue.use(VeeValidate, {
+  events: ''
+})
+
+Vue.use(VueTextareaAutosize)
 
 Vue.config.productionTip = false
 

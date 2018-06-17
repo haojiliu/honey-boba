@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    <div class="row">
+    <div v-if="this.designJson" class="row">
       <div class="col-6">
         <div class="card card-body mx-auto d-block">
           <div class="row d-flex align-items-top">
@@ -16,7 +16,12 @@
               <small class="text-muted">We will permanently delete all the data associated with this design. This action is not recoverable</small>
             </div>
             <div class="col-6">
-              <button @click="deleteDesign" class="btn btn-warning float-right" role="button">Delete It!</button>
+              <div v-if="!isDeleted">
+                <button @click="deleteDesign" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
+              </div>
+              <div v-else>
+                <p class="float-right text-success">Deleted</p>
+              </div>
             </div>
           </div>
         </div>
@@ -24,17 +29,18 @@
       </div>
       <div class="col-6">
         <div class="card card-body mx-auto d-block">
-          <img class="card-img-top" v-bind:src="designJson.thumbnail_uri">
-          <p class="text-muted text-right">Last updated at {{designJson.updated_at_utc}}</p>
+          <design-item v-bind:designJson="designJson"></design-item>
           <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
         </div>
       </div>
     </div>
+    <div v-else></div>
   </div>
 </template>
 <script>
 import ReviewWidget from './ReviewWidget'
 import DesignUploader from './DesignUploader'
+import DesignItem from './DesignItem'
 import axios from 'axios'
 
 export default {
@@ -42,12 +48,22 @@ export default {
   watch: {
     '$route' (to, from) {
       // react to route changes...
-      console.log('route changed from ' + from.params.uri + ' to ' + to.params.uri)
+      this.tryGetDesign(to.params.uri)
+    },
+    designJson: function (newVal, oldVal) { // watch it
+      // Re-render the reviews
+      console.log('val changed!!')
     }
   },
   components: {
     ReviewWidget,
-    DesignUploader
+    DesignUploader,
+    DesignItem
+  },
+  data () {
+    return {
+      isDeleted: false
+    }
   },
   computed: {
     designJson () {
@@ -61,18 +77,38 @@ export default {
       return formData
     },
     deleteDesign () {
+      var that = this
       console.log('going to delete a design')
       var formData = this._prepareFormData()
       axios.post('/api/delete',
         formData
       ).then(function (resp) {
-        console.log(resp.data)
-        console.log('delete design succeeded')
+        that.isDeleted = true
       }).catch(function (resp) {
         console.log('FAILURE!!')
       })
+    },
+    tryGetDesign (uri) {
+      if (this.$store.getters['designs/getDesignByUri'](uri) === undefined) {
+        this.$store.dispatch('designs/getOneDesign', uri)
+      }
     }
+  },
+  created () {
+    this.tryGetDesign(this.$route.params.uri)
+  },
+  beforeMount () {
+    console.log('before mount...')
+  },
+  mounted () {
+    console.log(' mounted')
+  },
+  destroyed () {
+    console.log('uploaded destroyed')
+  },
+  beforeDestroy () {
+    console.log('uploaded about to be destroyed')
   }
 }
 </script>
-<style></style>
+<style strict></style>
