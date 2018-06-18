@@ -11,6 +11,23 @@ from sqlalchemy.types import Numeric
 
 from session_factory import Base
 
+import constants
+
+
+class Comment(Base):
+  __tablename__ = 'comment'
+  id = Column(Integer, primary_key=True)
+  body = Column(String(1000), nullable=False)
+  created_at_utc = Column(String(250), nullable=False)
+
+  def __init__(self):
+    self.created_at_utc = time.time()
+
+  def to_string(self):
+    d = dict(self.__dict__)
+    del d['_sa_instance_state']
+    return str(d)
+
 class User(Base):
   __tablename__ = 'user'
   id = Column(Integer, primary_key=True)
@@ -19,11 +36,11 @@ class User(Base):
   created_at_utc = Column(String(250), nullable=False)
   updated_at_utc = Column(String(250), nullable=False)
 
-  def __init__(self, form):
-    self.email = form.get('email')
-    self.flags = form.get('flags', 0)
-    self.created_at_utc = form.get('created_at_utc')
-    self.created_at_utc = form.get('updated_at_utc')
+  designs = relationship("ReviewObject", lazy='joined')
+
+  def __init__(self):
+    self.flags = constants.CONST_FLAGS_ACTIVE
+    self.created_at_utc = time.time()
 
   def to_string(self):
     d = dict(self.__dict__)
@@ -54,7 +71,6 @@ class ReviewObject(Base):
     del d['_sa_instance_state']
     return str(d)
 
-# ie, person, corporation, llc
 class Notification(Base):
   __tablename__ = 'notification'
   id = Column(Integer, primary_key=True)

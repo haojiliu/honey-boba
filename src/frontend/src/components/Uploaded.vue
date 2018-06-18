@@ -17,7 +17,7 @@
             </div>
             <div class="col-6">
               <div v-if="!isDeleted">
-                <button @click="deleteDesign" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
+                <button @click="onDelete" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
               </div>
               <div v-else>
                 <p class="float-right text-success">Deleted</p>
@@ -76,17 +76,21 @@ export default {
       formData.append('uri', this.designJson.uri)
       return formData
     },
-    deleteDesign () {
-      var that = this
-      console.log('going to delete a design')
-      var formData = this._prepareFormData()
-      axios.post('/api/delete',
-        formData
-      ).then(function (resp) {
-        that.isDeleted = true
-      }).catch(function (resp) {
-        console.log('FAILURE!!')
-      })
+    onDelete () {
+      if (confirm('Are you sure you want to delete this design?')) {
+        var that = this
+        console.log('going to delete a design')
+        var formData = this._prepareFormData()
+        axios.post('/api/delete',
+          formData
+        ).then(function (resp) {
+          that.isDeleted = true
+        }).catch(function (resp) {
+          console.log('FAILURE!!')
+        })
+      } else {
+        // do nothing
+      }
     },
     tryGetDesign (uri) {
       if (this.$store.getters['designs/getDesignByUri'](uri) === undefined) {

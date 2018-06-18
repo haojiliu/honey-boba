@@ -1,11 +1,41 @@
 from datetime import date
 import time, datetime
 
-from model import Notification, Review, ReviewObject, Thumbnail
+from model import Notification, Review, ReviewObject, Thumbnail, Comment, User
 
 from session_factory import create_session
 import utils
 import constants
+import emailer
+
+def send_notifications():
+  try:
+    context = {}
+    last_timestamp = -1
+    with create_session() as s:
+      for user in _get_users(s):
+        context[user.id] = {}
+        for design in user.designs:
+          if len(design.reviews) > 0:
+            context[user.id][design.uri] = {
+              'title': design.description,
+              'reviews': []
+            }
+            for review in design.reviews:
+              if review.created_at_utc > last_timestamp:
+                new_review = {
+                  'body': review.body,
+                  'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
+                }
+                context[user.id][design.uri]['reviews'].append(new_review)
+        print('now for user %s, his email %s context looks like this: %s' % (user.id, user.email, context[user.id]))
+        subject = 'User %s have new reviews on %s designs!' % (user.id, len(user.designs))
+        body = str(context[user.id])
+        receivers = [user.email]
+        emailer.send(receivers, subject, body)
+  except:
+    raise
+    return 'Failed'
 
 def thumbnail(input_filepath, uri):
   for size_tuple in constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE:
@@ -13,11 +43,22 @@ def thumbnail(input_filepath, uri):
     filename = utils.thumbnail(input_filepath, uri, size_tuple)
     touch_thumbnail(uri, filename, size_code)
 
-def get_reviews(uris=None):
+def create_a_comment(body):
+  try:
+    with create_session() as s:
+      o = Comment()
+      o.body = body
+      s.add(o)
+    return ''
+  except:
+    raise
+    return 'Write a comments failed'
+
+def get_reviews(uris=None, timestamp=None):
   try:
     context = []
     with create_session() as s:
-      reviews = _get_reviews(s, uris=uris)
+      reviews = _get_reviews(s, uris=uris, timestamp=None)
       for review in reviews:
         new_review = {
           'body': review.body,
@@ -99,7 +140,20 @@ def touch_thumbnail(review_object_uri, filename, size_code):
     raise
     return 'Failed'
 
-def touch_review_object(uri, filename):
+def touch_user(s, email):
+  o = _get_user_by_email(s, email)
+  if not o:
+    print('user not exist, creating a new one...')
+    o = User()
+    o.email = email
+    # touch time
+    o.updated_at_utc = time.time()
+    s.add(o)
+    s.flush()
+    return o
+  return o[0]
+
+def touch_review_object(uri, filename, email=None, title=None):
   try:
     with create_session() as s:
       o = _get_review_objects(s, [uri])
@@ -110,8 +164,16 @@ def touch_review_object(uri, filename):
         print('updating existing design')
       o.uri = uri
       o.filename = filename
+      o.description = title
+      print('the title of the design is %s' % o.description)
       # touch time
       o.updated_at_utc = time.time()
+
+      # try create the user
+      if email:
+        user = touch_user(s, email)
+        o.uid = user.id
+        print('the user id is: %s' % o.uid)
       s.add(o)
     return 'touch design succeeded'
   except:
@@ -135,12 +197,25 @@ def _get_review_objects(session, uris):
     q = q.filter(ReviewObject.uri.in_(uris))
   return q.all()
 
-def _get_reviews(session, uris):
+def _get_users(session):
+  q = session.query(User)
+  return q.all()
+
+def _get_user_by_email(session, email):
+  """Return a list of ReviewObject"""
+  q = session.query(User)
+  q = q.filter(User.email == email)
+  return q.all()
+
+def _get_reviews(session, uris, timestamp):
   """Return a list of ReviewObject"""
   q = session.query(Review)
   if uris:
     q = q.filter(Review.review_object_uri.in_(uris))
-    q = q.order_by(Review.id.desc())
+  if timestamp:
+    q = q.filter(Review.created_at_utc > timestamp)
+
+  q = q.order_by(Review.id.desc())
 
   return q.all()
 
@@ -173,3 +248,6 @@ def report_review_objects(uris):
     raise
     return 'Report failed'
   return ''
+
+if __name__ == '__main__':
+  send_notifications()

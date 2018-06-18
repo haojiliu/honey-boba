@@ -32,14 +32,10 @@ def recaptcha():
   user_ip = request.environ['REMOTE_ADDR']
   user_browser = request.headers['User-Agent']
   g_recaptcha_response = request.form.get('g-recaptcha-response')
-  print(user_ip)
-  print(user_browser)
   g_recaptcha_post_data = {
     'secret': constants.CONST_GOOGLE_RECAPTCHA_SECRET_KEY,
     'response': g_recaptcha_response}
-  print(g_recaptcha_response)
   r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=g_recaptcha_post_data)
-  print(r.json())
   is_g_recaptcha_verified = r.json().get('success', False)
   return is_g_recaptcha_verified
 
@@ -81,16 +77,13 @@ def api_review(uri):
 @app.route('/api/review', methods=['POST'])
 def api_review_post():
   if request.method == 'POST':
-    recaptcha()
-    return ''
     error_msg = ''
-    review_text = request.form.get('reviewText')
-    uri = request.form.get('uri')
-    sanitized_review_text = utils.sanitize_user_input(review_text)
-    if len(sanitized_review_text) < constants.MIN_LEN_REVIEW:
+    review_text = utils.sanitize_user_input(request.form.get('reviewText'))
+    uri = utils.sanitize_user_input(request.form.get('uri'))
+    if len(review_text) < constants.MIN_LEN_REVIEW:
       error_msg = 'Your review is too short! Sure you can suggest more!'
     else:
-      error_msg = l.create_a_review(uri, sanitized_review_text)
+      error_msg = l.create_a_review(uri, review_text)
     return jsonify({
       'status': 0 if not error_msg else 1,
       'error_msg': error_msg
@@ -135,15 +128,16 @@ def _handle_file_upload(file, uri=None):
   l.thumbnail(fpath, uri)
   return {'uri': uri, 'filename': filename}
 
-def _touch_file(uri):
+def _touch_file(uri, email, title):
   error_msg = file_upload_sanity_check(uri)
   if error_msg:
     return error_msg, None
+  # first save the file and thumbnail it
   file_info_dict = _handle_file_upload(request.files['file'], uri)
   uri = file_info_dict['uri']
-  # create a database ORM for it
+  # lastly, create a database ORM for it
   filename = file_info_dict['filename']
-  l.touch_review_object(uri, filename)
+  l.touch_review_object(uri, filename, email, title)
   return error_msg, uri
 
 # TODO: use this https://pythonhosted.org/Flask-Uploads/
@@ -155,9 +149,14 @@ def api_upload():
   return the generated uri
   """
   try:
-    uri = request.form.get('uri')
-    print(uri)
-    error_msg, uri = _touch_file(uri)
+    uri = utils.sanitize_user_input(request.form.get('uri'))
+    email = utils.sanitize_user_input(request.form.get('email'))
+    title = utils.sanitize_user_input(request.form.get('title'))
+    if not uri and not recaptcha():
+      error_msg = 'You failed the gRecaptcha test'
+    else:
+      error_msg, uri = _touch_file(uri, email, title)
+
     assert not (error_msg and uri), 'Either error message or uri, not both'
     return jsonify({
       'status': 0 if not error_msg else 1,
@@ -165,15 +164,14 @@ def api_upload():
       'uri': uri
     })
   except RequestEntityTooLarge:
-    return jsonify({'errors': 'from flask: File too large, downsize and try again.'})
+    return jsonify({'status': 1, 'errors': 'from flask: File too large, downsize and try again.'})
 
 @app.route('/api/delete', methods=['POST'])
 def api_delete():
   """
   This is the endpoint to delete the uploaded design
   """
-  uri = request.form.get('uri')
-  print(uri)
+  uri = utils.sanitize_user_input(request.form.get('uri'))
   error_msg = l.delete_review_objects(uris=[uri])
   return jsonify({
     'status': 0 if not error_msg else 1,
@@ -185,13 +183,26 @@ def api_report():
   """
   This is the endpoint to report an inappropriate design
   """
-  uri = request.form.get('uri')
-  print(uri)
+  uri = utils.sanitize_user_input(request.form.get('uri'))
   error_msg = l.report_review_objects(uris=[uri])
   return jsonify({
     'status': 0 if not error_msg else 1,
     'error_msg': error_msg
   })
+
+@app.route('/api/dev', methods=['POST'])
+def api_dev():
+  """
+  This is the endpoint to leave a comment or report a bug
+  """
+  body = utils.sanitize_user_input(request.form.get('body'))
+  print(body)
+  error_msg = l.create_a_comment(body=body)
+  return jsonify({
+    'status': 0 if not error_msg else 1,
+    'error_msg': error_msg
+  })
+
 if __name__ == '__main__':
   if len(sys.argv) == 2:
     p = sys.argv[1]

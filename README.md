@@ -1,13 +1,17 @@
 # honey-boba
 
-# TODOs:
-- figure out why server side can't verify a recaptcha response, always return false
+# TODOs before release:
+- cron job to send digest to those active designs with not empty emails, and has new comments made
 
-- responsive resizing of text
 - custom validation message
-- report a bug form on /faq page
-- show error message when server side failed?
+- docker set up
+- deploy to aws
+- register a domain name
+- figure out why update a design doesn't show up after a refresh, cached somewhere??
 
+# TODOs after release:
+- show error message when server side code failed?
+- responsive resizing of text
 - upload the same file again
 - upload the same form again
 - upload the same review again

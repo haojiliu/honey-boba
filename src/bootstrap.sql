@@ -30,6 +30,12 @@ CREATE TABLE IF NOT EXISTS review_object(
   created_at_utc text NOT NULL,
   updated_at_utc text NOT NULL);
 
+CREATE TABLE IF NOT EXISTS comment(
+  id integer PRIMARY KEY NOT NULL,
+  created_at_utc text NOT NULL,
+  body text NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS review(
   id integer PRIMARY KEY NOT NULL,
   flags numeric,

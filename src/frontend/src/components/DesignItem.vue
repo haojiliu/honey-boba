@@ -7,7 +7,7 @@
       </div>
       <div class="col-6 text-right">
         <a v-if="!isReported && !this.$route.params.uri"  @click="onReport" class="btn"><small class="text-primary">Report This</small></a>
-        <small v-if="isReported && !this.$route.params.uri" class="text-succeeded">Reported</small>
+        <small v-if="isReported && !this.$route.params.uri" class="text-success">Reported</small>
       </div>
     </div>
   </div>
@@ -29,18 +29,22 @@ export default {
       return formData
     },
     onReport () {
-      var that = this
-      console.log('going to report this design!')
-      var formData = this._prepareFormData()
-      axios.post('/api/report',
-        formData
-      ).then(function (resp) {
-        console.log(resp.data)
-        console.log('report a design succeeded')
-        that.isReported = true
-      }).catch(function (resp) {
-        console.log('FAILURE!!')
-      })
+      if (confirm('Are you sure you want to report this design?')) {
+        var that = this
+        console.log('going to report this design!')
+        var formData = this._prepareFormData()
+        axios.post('/api/report',
+          formData
+        ).then(function (resp) {
+          console.log(resp.data)
+          console.log('report a design succeeded')
+          that.isReported = true
+        }).catch(function (resp) {
+          console.log('FAILURE!!')
+        })
+      } else {
+          // Do nothing!
+      }
     }
   }
 }
