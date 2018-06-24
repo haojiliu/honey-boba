@@ -8,35 +8,6 @@ import utils
 import constants
 import emailer
 
-def send_notifications():
-  try:
-    context = {}
-    last_timestamp = -1
-    with create_session() as s:
-      for user in _get_users(s):
-        context[user.id] = {}
-        for design in user.designs:
-          if len(design.reviews) > 0:
-            context[user.id][design.uri] = {
-              'title': design.description,
-              'reviews': []
-            }
-            for review in design.reviews:
-              if review.created_at_utc > last_timestamp:
-                new_review = {
-                  'body': review.body,
-                  'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
-                }
-                context[user.id][design.uri]['reviews'].append(new_review)
-        print('now for user %s, his email %s context looks like this: %s' % (user.id, user.email, context[user.id]))
-        subject = 'User %s have new reviews on %s designs!' % (user.id, len(user.designs))
-        body = str(context[user.id])
-        receivers = [user.email]
-        emailer.send(receivers, subject, body)
-  except:
-    raise
-    return 'Failed'
-
 def thumbnail(input_filepath, uri):
   for size_tuple in constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE:
     size_code = constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE[size_tuple]
@@ -83,6 +54,9 @@ def get_all_active_designs(uris=None):
       for design in designs:
         new_design = {
           'uri': design.uri,
+          'name': design.name,
+          'desc': design.description,
+          'uid': design.user.id if design.user else None,
           'updated_at_utc': utils.epoch_to_datetime_string(design.updated_at_utc),
           'reviews': []
         }
@@ -118,7 +92,7 @@ def create_a_review(review_object_uri, body, email=None):
     return ''
   except:
     raise
-    return 'Post a review failed'
+    return 'Failed to post a review, please try again.'
 
 def touch_thumbnail(review_object_uri, filename, size_code):
   try:
@@ -153,7 +127,7 @@ def touch_user(s, email):
     return o
   return o[0]
 
-def touch_review_object(uri, filename, email=None, title=None):
+def touch_review_object(uri, filename=None, email=None, name=None, description=None):
   try:
     with create_session() as s:
       o = _get_review_objects(s, [uri])
@@ -162,10 +136,19 @@ def touch_review_object(uri, filename, email=None, title=None):
       else:
         o = o[0]
         print('updating existing design')
-      o.uri = uri
-      o.filename = filename
-      o.description = title
-      print('the title of the design is %s' % o.description)
+      if filename:
+        print('updating filename!!')
+        o.filename = filename
+      # always update name and desc
+      print('updating desc!')
+      o.description = description
+      print('updating name!')
+      o.name = name
+
+      if not o.uri:
+        o.uri = uri
+      else:
+        print('not updating uri for existing design')
       # touch time
       o.updated_at_utc = time.time()
 
@@ -195,6 +178,8 @@ def _get_review_objects(session, uris):
   q = q.filter(ReviewObject.flags == constants.CONST_FLAGS_ACTIVE)
   if uris:
     q = q.filter(ReviewObject.uri.in_(uris))
+  q = q.order_by(ReviewObject.id.desc())
+
   return q.all()
 
 def _get_users(session):
@@ -218,6 +203,13 @@ def _get_reviews(session, uris, timestamp):
   q = q.order_by(Review.id.desc())
 
   return q.all()
+
+def get_email_by_uid(uid):
+  with create_session() as session:
+    q = session.query(User)
+    q = q.filter(Review.id == uid)
+    user = q.first()
+    return user.email if user else ''
 
 def get_review_objects(uris=None):
   """Return a list of ReviewObject object in strings"""
@@ -248,6 +240,3 @@ def report_review_objects(uris):
     raise
     return 'Report failed'
   return ''
-
-if __name__ == '__main__':
-  send_notifications()

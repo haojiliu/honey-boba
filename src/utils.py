@@ -32,10 +32,7 @@ def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
     im = Image.open(input_filepath)
     print(im.format)
     im = color_conversion(im)
-    print('image opened!')
     im.thumbnail(size_tuple)
-    print('thumbnail finished!')
-    print(output_filepath)
     im.save(output_filepath, "JPEG")
     print('saved to jpeg!!')
     return output_filename

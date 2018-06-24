@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
+  <div v-if="this.$store.state.designs.isFetched" class="container-fluid" style="">
+    <div class="oneDesign card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
       <design-item v-bind:designJson="designJson"></design-item>
       <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
       <new-review v-bind:uri="designJson.uri"></new-review>
@@ -18,6 +18,15 @@ export default {
     ReviewWidget,
     NewReview,
     DesignItem
+  },
+  beforeRouteEnter (to, from, next) {
+    // called before the route that renders this component is confirmed.
+    // does NOT have access to `this` component instance,
+    // because it has not been created yet when this guard is called!
+    console.log('before route enters design viewer!!')
+    next(vm => {
+      console.log(vm.$store.state.designs.isFetched)
+    })
   },
   computed: {
     designsJson () {
@@ -49,3 +58,9 @@ export default {
   }
 }
 </script>
+<style>
+.oneDesign {
+  border: 0;
+  padding-top: 0;
+}
+</style>

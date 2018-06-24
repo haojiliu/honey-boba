@@ -2,36 +2,25 @@
   <div class="container-fluid">
     <div v-if="this.designJson" class="row">
       <div class="col-6">
-        <div class="card card-body mx-auto d-block">
-          <div class="row d-flex align-items-top">
-            <div class="col-12">
-              <p class="lead"><strong><em>STOP! Make sure this is your design before making any changes</em></strong></p>
-            </div>
-          </div>
-        </div>
-        <div class="card card-body mx-auto d-block">
-          <div class="row d-flex align-items-top">
-            <div class="col-6">
-              <h4>Remove this design</h4>
-              <small class="text-muted">We will permanently delete all the data associated with this design. This action is not recoverable</small>
-            </div>
-            <div class="col-6">
-              <div v-if="!isDeleted">
-                <button @click="onDelete" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
-              </div>
-              <div v-else>
-                <p class="float-right text-success">Deleted</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <design-uploader></design-uploader>
-      </div>
-      <div class="col-6">
-        <div class="card card-body mx-auto d-block">
+        <div class="oneDesign card card-body mx-auto d-block">
           <design-item v-bind:designJson="designJson"></design-item>
           <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
         </div>
+      </div>
+      <div class="col-6">
+        <email-confirmation v-bind:designJson="designJson" @emailConfirmed="onEmailConfirmed"></email-confirmation>
+        <div v-if="this.isFileUpdated || this.$route.params.slug" class="card card-body mx-auto d-block">
+          <div class="row d-flex align-items-top">
+            <div class="col-12">
+              <p v-if="this.isFileUpdated" class="lead"><strong><em>Your file was updated</em></strong></p>
+              <p v-if="!this.isFileUpdated && this.$route.params.slug" class="lead"><strong><em>Woohoo! You uploaded a design!</em></strong></p>
+              <!-- <p v-if="!this.isFileUpdated && !this.$route.params.slug" class="lead"><strong><em>STOP! Make sure this is your design before making any changes</em></strong></p> -->
+            </div>
+          </div>
+        </div>
+        <design-uploader v-bind:designJson="designJson" @fileUpdated="onFileUpdated"></design-uploader>
+        <update-design-info-widget v-bind:designJson="designJson"></update-design-info-widget>
+        <delete-design-widget v-bind:designJson="designJson"></delete-design-widget>
       </div>
     </div>
     <div v-else></div>
@@ -41,6 +30,10 @@
 import ReviewWidget from './ReviewWidget'
 import DesignUploader from './DesignUploader'
 import DesignItem from './DesignItem'
+import EmailConfirmation from './EmailConfirmation'
+import UpdateDesignInfoWidget from './UpdateDesignInfoWidget'
+import DeleteDesignWidget from './DeleteDesignWidget'
+
 import axios from 'axios'
 
 export default {
@@ -52,17 +45,21 @@ export default {
     },
     designJson: function (newVal, oldVal) { // watch it
       // Re-render the reviews
-      console.log('val changed!!')
+      console.log('inside uploaded val changed!!')
     }
   },
   components: {
     ReviewWidget,
     DesignUploader,
-    DesignItem
+    DesignItem,
+    EmailConfirmation,
+    UpdateDesignInfoWidget,
+    DeleteDesignWidget
   },
   data () {
     return {
-      isDeleted: false
+      isFileUpdated: false,
+      isEmailConfirmed: false
     }
   },
   computed: {
@@ -71,26 +68,13 @@ export default {
     }
   },
   methods: {
-    _prepareFormData () {
-      let formData = new FormData()
-      formData.append('uri', this.designJson.uri)
-      return formData
+    onEmailConfirmed () {
+      this.isEmailConfirmed = true
     },
-    onDelete () {
-      if (confirm('Are you sure you want to delete this design?')) {
-        var that = this
-        console.log('going to delete a design')
-        var formData = this._prepareFormData()
-        axios.post('/api/delete',
-          formData
-        ).then(function (resp) {
-          that.isDeleted = true
-        }).catch(function (resp) {
-          console.log('FAILURE!!')
-        })
-      } else {
-        // do nothing
-      }
+    onFileUpdated () {
+      // disable the cache on the image
+      this.$store.commit('designs/touchThumbnail', this.designJson.uri)
+      this.isFileUpdated = true
     },
     tryGetDesign (uri) {
       if (this.$store.getters['designs/getDesignByUri'](uri) === undefined) {
@@ -115,4 +99,12 @@ export default {
   }
 }
 </script>
-<style strict></style>
+<style strict>
+.oneDesign {
+  border: 0;
+  padding-top: 0;
+}
+#deleteButton {
+  border-radius: 0;
+}
+</style>

@@ -1,26 +1,28 @@
 <template>
   <div class="card card-body mx-auto d-block">
-    <div class="row d-flex align-items-top">
-      <div v-if="this.$route.params.uri" class="col-12">
-        <h4>Update it</h4>
-      </div>
-    </div>
     <div v-if="!this.$route.params.uri" class="row d-flex align-items-top">
       <div class="col-12 mb-2">
-        <input v-model="title" v-validate="'required'" type="text" name="title" class="form-control" placeholder="Give it a name">
-        <small class="form-text text-muted">Enter a name to best describe this design</small>
-        <small class="text-danger">{{ errors.first('title') }}</small>
+        <input v-model="name" v-validate="'required'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design">
+        <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
+        <small class="text-danger">{{ errors.first('name') }}</small>
       </div>
       <div class="col-12 mb-2">
-        <input v-model="email" v-validate="'email'" type="email" name="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
-        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people comment on this design</small>
+        <input v-model="desc" type="text" name="desc" class="form-control" placeholder="Anything you want to say about this design">
+        <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
+        <small class="text-danger">{{ errors.first('desc') }}</small>
+      </div>
+      <div class="col-12 mb-2">
+        <input v-model="email" v-validate="'required|email'" type="email" name="email" class="form-control" placeholder="Enter email">
         <small class="text-danger">{{ errors.first('email') }}</small>
+        <input v-model="emailConfirmation" type="email" name="confirmEmail" class="form-control mt-1" placeholder="Confirm your email">
+        <small v-if="emailConfirmation !== email" class="text-danger">Doesn't match your email above</small>
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people comment on this design</small>
       </div>
     </div>
     <div class="row d-flex align-items-top">
       <div class="col-12 mb-2">
-        <small id="uploadHelp" class="form-text text-muted">Make sure you upload a .jpg or .png file.</small>
         <input v-validate="{required: true, image: true, size: 10240}" type="file" name="file" ref="file" v-on:change="handleFileUpload" class="form-control-file" aria-describedby="uploadHelp">
+        <small id="uploadHelp" class="form-text text-muted">Make sure you upload a .jpg or .png file.</small>
         <small class="text-danger">{{ errors.first('file') }}</small>
       </div>
       <!-- <div class="g-recaptcha" data-sitekey="6LcwUV8UAAAAAJo2f_MbbAbJTdr8xFpw1T4Naxpy"></div> -->
@@ -28,9 +30,14 @@
         <vue-recaptcha @verify="onVerify" sitekey="6LcwUV8UAAAAAJo2f_MbbAbJTdr8xFpw1T4Naxpy"></vue-recaptcha>
       </div>
       <div class="col-12">
-        <button class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
-        <div v-if="lastUploadAt">
-          <p class="float-right text-success">Last uploaded at: {{lastUploadAt}}</p>
+        <button v-if="!this.$route.params.uri" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
+        <button v-else id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Update File</button>
+        <div v-if="errorMsg.length === 0 && lastUploadAt">
+          <p v-if="!this.$route.params.uri" class="float-right text-success">Submitted at: {{lastUploadAt}}</p>
+          <p v-else class="float-right text-success">Updated at: {{lastUploadAt}}</p>
+        </div>
+        <div v-if="errorMsg.length>0">
+          <p class="float-right text-danger">{{errorMsg}}</p>
         </div>
       </div>
     </div>
@@ -55,10 +62,13 @@ export default {
     return {
       file: null,
       email: '',
-      title: '',
+      name: '',
+      desc: '',
       lastUploadAt: '',
       isRecaptchaVerified: false,
-      gRecaptchaResp: ''
+      gRecaptchaResp: '',
+      errorMsg: '',
+      emailConfirmation: ''
     }
   },
   methods: {
@@ -72,16 +82,21 @@ export default {
       let formData = new FormData()
       formData.append('file', this.file)
       formData.append('email', this.email)
-      formData.append('title', this.title)
+      formData.append('name', this.name)
       formData.append('uri', this.uri)
       formData.append('g-recaptcha-response', this.gRecaptchaResp)
       return formData
     },
     uploadFile () {
-      this.$validator.validate().then(result => {
+      this.$emit('fileUpdated')
+      if (this.emailConfirmation !== this.email) {
+        return
+      }
+      this.$validator.validateAll().then(result => {
         if (!result) {
           // do stuff if not valid.
         } else {
+          NProgress.start()
           var formData = this._prepareFormData()
           var that = this
           axios.post('/api/upload',
@@ -92,8 +107,21 @@ export default {
               }
             }
           ).then(function (resp) {
-            that.lastUploadAt = new Date(Date.now())
             console.log(resp.data)
+            if (resp.data.status === 0) {
+              NProgress.done()
+              // redirect only on /upload new ones, not update existing ones
+              if (that.uri.length === 0) {
+                console.log('switching view!')
+                that.$router.push('/uploaded/' + resp.data.uri + '/i')
+              } else {
+                console.log('not switching view!')
+                that.lastUploadAt = new Date(Date.now())
+                that.$emit('fileUpdated')
+              }
+            } else {
+              that.errorMsg = resp.data.errors
+            }
           }).catch(function (resp) {
             console.log('FAILURE!!')
           })
@@ -107,3 +135,8 @@ export default {
   }
 }
 </script>
+<style>
+#uploadButton {
+  border-radius: 0;
+}
+</style>

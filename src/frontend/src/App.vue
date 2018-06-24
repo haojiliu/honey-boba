@@ -16,7 +16,7 @@ export default {
 
 <style strict>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'PT Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -24,6 +24,7 @@ export default {
 .card {
   margin: 20px;
   max-width: 800px;
+  padding: 1rem;
 }
 p {
   margin: 0;

@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style type="text/css">
+    body {
+
+    }
+    #topBanner {
+      background-color: grey;
+      height: 70px;
+    }
+    #titleText {
+      color: white;
+    }
+    #headingText {
+      color: grey;
+    }
+  </style>
+  </head>
+  <body>
+    <div class="col-12 d-flex justify-content-center align-items-center" id="topBanner">
+      <h1 id="titleText">Honey Boba</h1>
+    </div>
+    <div class="col-12 container-fluid" id="body">
+      <div class="card mb-2">
+        <div class="card-body">
+          <p><strong>{{name}}</strong> is now alive!</p>
+          <h4>You can visit it <a href="https://www.honey-boba.com/uploaded/{{uri}}">here</a></h4>
+          <h4>or click on the link below</h4>
+          <p><a href="https://www.honey-boba.com/uploaded/{{uri}}">https://www.honey-boba.com/uploaded/{{uri}}</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 d-flex justify-content-end" id="footer">
+      <small>One boba a day.</small>
+    </div>
+  </body>
+</html>

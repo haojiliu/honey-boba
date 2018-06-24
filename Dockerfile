@@ -14,8 +14,7 @@ ADD ./config /srv/config
 RUN pip3 install --upgrade pip
 RUN pip3 install -r /srv/config/requirements.txt
 
-EXPOSE 5000, 9002
-
+EXPOSE 5000 9002
 
 # Copy config files over
 ADD ./config/supervisord.conf /etc/supervisord.conf

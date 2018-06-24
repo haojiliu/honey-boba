@@ -1,22 +1,35 @@
 # honey-boba
 
 # TODOs before release:
-- cron job to send digest to those active designs with not empty emails, and has new comments made
+- switch from using User.id to User.uid
+- disable buttons if email not confirmed
+- move email confirmation widget and design info updater widget out of Uploaded.vue
+- each design has a field that designer can add like "I want to know which font fits more, etc.", display the field under each design
+- navbar drop down doesn't work
 
-- custom validation message
-- docker set up
-- deploy to aws
+- tweak email template
+- tweak UI
+
+- make a docker image and upload to docker cloud
 - register a domain name
-- figure out why update a design doesn't show up after a refresh, cached somewhere??
+- register an email
+- deploy to aws
+
+- make a logo
+
 
 # TODOs after release:
+- research on how cookie or token can be used to remember some info like "auth'd on this computer already, or submitted XYZ on this computer..."
+- custom validation message
 - show error message when server side code failed?
 - responsive resizing of text
 - upload the same file again
 - upload the same form again
 - upload the same review again
-- upload a new file doesn't show up, probably cached somewhere
 
+- log rotation
+
+- drag and drop instead of a CHOOSE FILE button
 - implement lazyloading
 - move getter methods from logic to model
 

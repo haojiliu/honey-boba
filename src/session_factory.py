@@ -21,5 +21,4 @@ def create_session():
     session.rollback()
     raise
   finally:
-    print('closing session!!')
     session.close()

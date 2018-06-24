@@ -55,12 +55,14 @@ class ReviewObject(Base):
   uid = Column(Integer, ForeignKey("user.id"), nullable=True)
   flags = Column(Integer, nullable=False)
   filename = Column(String(250), nullable=False)
+  name = Column(String(250), nullable=True)
   description = Column(String(250), nullable=True)
   created_at_utc = Column(String(250), nullable=False)
   updated_at_utc = Column(String(250), nullable=False)
 
   reviews = relationship("Review", lazy='joined')
   thumbnails = relationship("Thumbnail", lazy='joined')
+  user = relationship("User", lazy='joined')
 
   def __init__(self):
     self.created_at_utc = time.time()
@@ -74,22 +76,12 @@ class ReviewObject(Base):
 class Notification(Base):
   __tablename__ = 'notification'
   id = Column(Integer, primary_key=True)
-  type = Column(String(250), nullable=False)
-  kv_json = Column(String(250), nullable=True)
-  receivers = Column(String(250), nullable=True)
-  sender = Column(String(250), nullable=True)
   flags = Column(Integer, nullable=True)
-  created_at_utc = Column(String(250), nullable=True)
+  created_at_utc = Column(String(250), nullable=False)
   updated_at_utc = Column(String(250), nullable=True)
 
-  def __init__(self, form):
-    self.type = form.get('type')
-    self.kv_json = form.get('kv_json', None)
-    self.sender = form.get('sender')
-    self.receivers = form.get('receivers')
-    self.flags = form.get('flags', 0)
-    self.created_at_utc = form.get('created_at_utc')
-    self.updated_at_utc = form.get('updated_at_utc')
+  def __init__(self):
+    self.created_at_utc = time.time()
 
   def to_string(self):
     d = dict(self.__dict__)

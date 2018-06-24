@@ -5,7 +5,7 @@
         <textarea-autosize
           id="newReviewText"
           v-validate="'required|min:10'"
-          name="reviewText"
+          name="review"
           rows="1"
           placeholder="Share your thoughts"
           class="form-control"
@@ -14,10 +14,10 @@
           :max-height="350"
         ></textarea-autosize>
         <div class="input-group-append">
-          <button @click="onSubmit" class="btn btn-outline-dark" type="button">Send</button>
+          <button id="send" @click="onSubmit" class="btn btn-outline-dark" type="button">Send</button>
         </div>
       </div>
-      <small class="text-danger">{{ errors.first('reviewText') }}</small>
+      <small class="text-danger">{{ errors.first('review') }}</small>
     </form>
   </div>
 </template>
@@ -63,8 +63,10 @@ export default {
 </script>
 <style strict>
 #newReviewText {
-  border-left: none;
-  border-top: none;
+  border-radius: 0;
+}
+#send {
+  /* border-radius: 0; */
 }
 #newReview {
   padding-top: 5px;

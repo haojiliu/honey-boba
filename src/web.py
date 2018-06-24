@@ -12,8 +12,18 @@ from flask import send_from_directory, render_template, safe_join
 import logic as l
 import utils
 import constants
+import emailer
 
 from flask_cors import CORS
+
+import zmq
+
+context = zmq.Context()
+connect_string = 'tcp://{}:{}'.format(
+    constants.zmq_event_host, constants.event_pub_port)
+socket = context.socket(zmq.PUB)
+socket.connect(connect_string)
+print('connect to %s' % connect_string)
 
 # Instantiate the Node
 app = Flask(__name__,
@@ -80,10 +90,7 @@ def api_review_post():
     error_msg = ''
     review_text = utils.sanitize_user_input(request.form.get('reviewText'))
     uri = utils.sanitize_user_input(request.form.get('uri'))
-    if len(review_text) < constants.MIN_LEN_REVIEW:
-      error_msg = 'Your review is too short! Sure you can suggest more!'
-    else:
-      error_msg = l.create_a_review(uri, review_text)
+    error_msg = l.create_a_review(uri, review_text)
     return jsonify({
       'status': 0 if not error_msg else 1,
       'error_msg': error_msg
@@ -113,11 +120,6 @@ def file_upload_sanity_check(uri):
   return ''
 
 def _handle_file_upload(file, uri=None):
-  if uri:
-    print('updating existing design...')
-  else:
-    print('creating new design...')
-
   filename = file.filename
   uri = uri or str(uuid.uuid4())
   fdir = safe_join(app.config['UPLOAD_FOLDER'], uri)
@@ -128,7 +130,7 @@ def _handle_file_upload(file, uri=None):
   l.thumbnail(fpath, uri)
   return {'uri': uri, 'filename': filename}
 
-def _touch_file(uri, email, title):
+def _touch_file(uri, email, name, desc):
   error_msg = file_upload_sanity_check(uri)
   if error_msg:
     return error_msg, None
@@ -137,8 +139,25 @@ def _touch_file(uri, email, title):
   uri = file_info_dict['uri']
   # lastly, create a database ORM for it
   filename = file_info_dict['filename']
-  l.touch_review_object(uri, filename, email, title)
+  l.touch_review_object(uri, filename, email, name, desc)
   return error_msg, uri
+
+@app.route('/api/update', methods=['POST'])
+def api_update():
+  """Handles design info update,
+  """
+  try:
+    uri = utils.sanitize_user_input(request.form.get('uri'))
+    name = utils.sanitize_user_input(request.form.get('name'))
+    desc = utils.sanitize_user_input(request.form.get('desc'))
+    print('uri is %s desc is %s and name is %s' % (uri, desc, name))
+    l.touch_review_object(uri, None, None, name, desc)
+    return jsonify({
+      'status': 0,
+      'errors': ''
+    })
+  except:
+    return jsonify({'status': 1, 'errors': 'Something wrong when updating design info'})
 
 # TODO: use this https://pythonhosted.org/Flask-Uploads/
 @app.route('/api/upload', methods=['POST'])
@@ -151,20 +170,49 @@ def api_upload():
   try:
     uri = utils.sanitize_user_input(request.form.get('uri'))
     email = utils.sanitize_user_input(request.form.get('email'))
-    title = utils.sanitize_user_input(request.form.get('title'))
+    name = utils.sanitize_user_input(request.form.get('name'))
+    desc = utils.sanitize_user_input(request.form.get('desc'))
     if not uri and not recaptcha():
       error_msg = 'You failed the gRecaptcha test'
     else:
-      error_msg, uri = _touch_file(uri, email, title)
-
-    assert not (error_msg and uri), 'Either error message or uri, not both'
+      error_msg, uri = _touch_file(uri, email, name, desc)
+      assert not (error_msg and uri), 'Either error message or uri, not both'
+      # if file successfully uploaded, send an email
+      if not error_msg:
+        print('no error message')
+        if email:
+          print('going to send an email')
+          payload = {
+            'type': 0,
+            'receivers': [email],
+            'uri': uri,
+            'name': name
+          }
+          socket.send_json(payload)
+        else:
+          # either updating existing design, or uploader didn't provide an email
+          pass
     return jsonify({
       'status': 0 if not error_msg else 1,
       'errors': error_msg,
       'uri': uri
     })
   except RequestEntityTooLarge:
-    return jsonify({'status': 1, 'errors': 'from flask: File too large, downsize and try again.'})
+    return jsonify({'status': 1, 'errors': 'File too large, please downsize and try again.'})
+
+@app.route('/api/auth/email', methods=['POST'])
+def api_auth_email():
+  """
+  This is the endpoint to delete the uploaded design
+  """
+  email = utils.sanitize_user_input(request.form.get('email'))
+  uid = utils.sanitize_user_input(request.form.get('uid'))
+  print('email: %s, uid: %s' % (email, uid))
+  true_email = l.get_email_by_uid(uid=uid)
+  return jsonify({
+    'status': 0 if email == true_email else 1,
+    'errors': 'Failed, please try again.'
+  })
 
 @app.route('/api/delete', methods=['POST'])
 def api_delete():
@@ -196,7 +244,6 @@ def api_dev():
   This is the endpoint to leave a comment or report a bug
   """
   body = utils.sanitize_user_input(request.form.get('body'))
-  print(body)
   error_msg = l.create_a_comment(body=body)
   return jsonify({
     'status': 0 if not error_msg else 1,

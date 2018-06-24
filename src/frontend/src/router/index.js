@@ -12,6 +12,7 @@ const routes = [
   { path: '/designs', component: DesignViewer },
   { path: '/upload', component: DesignUploader },
   { path: '/uploaded/:uri', component: Uploaded },
+  { path: '/uploaded/:uri/:slug', component: Uploaded },
   { path: '/faq', component: FAQ },
   { path: '*', component: NotFound }
 ]
