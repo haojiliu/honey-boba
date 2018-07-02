@@ -2,8 +2,8 @@
   <div v-if="this.$store.state.designs.isFetched" class="container-fluid" style="">
     <div class="oneDesign card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
       <design-item v-bind:designJson="designJson"></design-item>
-      <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
-      <new-review v-bind:uri="designJson.uri"></new-review>
+      <review-widget :ref="'review-'+designJson.uri" v-bind:uri="designJson.uri" v-bind:reviewsJson="designJson.reviews"></review-widget>
+      <new-review v-bind:uri="designJson.uri" @newReviewPosted="onNewReviewPosted"></new-review>
     </div>
   </div>
 </template>
@@ -18,6 +18,20 @@ export default {
     ReviewWidget,
     NewReview,
     DesignItem
+  },
+  methods: {
+    onNewReviewPosted (uri) {
+      // scroll page to the new review
+      var reviewEl = this.$refs['review-'+uri][0]
+      // not supported on safari
+      // reviewEl.$el.scrollIntoView({
+      //   behavior: 'smooth',
+      //   block: 'center',
+      //   inline: 'nearest'
+      // });
+      // not supported on firefox
+      reviewEl.$el.scrollIntoViewIfNeeded()
+    },
   },
   beforeRouteEnter (to, from, next) {
     // called before the route that renders this component is confirmed.
@@ -62,5 +76,6 @@ export default {
 .oneDesign {
   border: 0;
   padding-top: 0;
+  padding-bottom: 0;
 }
 </style>

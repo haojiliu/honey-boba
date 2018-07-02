@@ -1,8 +1,10 @@
-BASE_DIR = '/Users/haojiliu/src/honey-boba/'
-UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
+BASE_DIR_DEV = '/Users/haojiliu/src/honey-boba/'
+BASE_DIR_PROD = '/srv/'
+
+UPLOAD_FOLDER = BASE_DIR_PROD + 'uploaded_files'
 
 THUMBNAIL_FOLDER = '/static/thumbnail/designs'
-THUMBNAIL_FULL_DIR = BASE_DIR + 'src/static/thumbnail/designs'
+THUMBNAIL_FULL_DIR = BASE_DIR_PROD + 'src/static/thumbnail/designs'
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -33,7 +35,7 @@ CONST_EMAILER_SENDER = 'divid86391@gmail.com'
 CONST_EMAILER_PASSWORD = '1949101Saruman'
 
 CONST_DESIGN_URL = 'http://www.honey-boba.com/uploaded/%s'
-CONST_EMAIL_DIGEST_INTERVAL_IN_SECONDS = 3600
+CONST_EMAIL_DIGEST_INTERVAL_IN_SECONDS = 3600 # Send digest email per hour
 
 zmq_event_host = '0.0.0.0'
 event_pub_port = 8081

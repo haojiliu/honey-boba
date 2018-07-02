@@ -14,7 +14,7 @@ def write(sock):
   while True:
     logging.warning('waiting for write requests...')
     data = sock.recv_json()
-    print('received an event request, data is %s' % data)
+    logging.warning('received an event request, data is %s' % data)
     receivers = data.get('receivers')
     uri = data.get('uri')
     name = data.get('name')

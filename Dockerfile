@@ -10,11 +10,12 @@ RUN apt-get -y install python3-pip man build-essential nginx python-dev curl vim
 
 RUN mkdir /srv/logs
 
+ADD ./src /srv/src
 ADD ./config /srv/config
 RUN pip3 install --upgrade pip
 RUN pip3 install -r /srv/config/requirements.txt
 
-EXPOSE 5000 9002
+EXPOSE 5000 9002 80
 
 # Copy config files over
 ADD ./config/supervisord.conf /etc/supervisord.conf

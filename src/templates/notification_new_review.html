@@ -2,40 +2,53 @@
   <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Condensed:400,800" rel="stylesheet">
     <style type="text/css">
-    body {
-
-    }
-    #topBanner {
-      background-color: grey;
-      height: 70px;
-    }
-    #titleText {
-      color: white;
-    }
-    #headingText {
-      color: grey;
-    }
-  </style>
+      body {
+        font-family: 'Encode Sans Condensed';
+      }
+      #topBanner {
+        background-color: rgba(235, 152, 37, 0.08);
+        height: 70px;
+      }
+      #secondaryTitle {
+        font-size: 40%;
+      }
+      #titleText {
+        color: rgba(0, 0, 0, 0.79);
+      }
+      .bodyText {
+        color: rgba(0, 0, 0, 0.79);
+      }
+    </style>
   </head>
   <body>
     <div class="col-12 d-flex justify-content-center align-items-center" id="topBanner">
-      <h1 id="titleText">Honey Boba</h1>
+      <h1 id="titleText">
+        <strong>Honey Boba</strong>
+        <small id="secondaryTitle"class="text-muted">Always Anonymous</small>
+      </h1>
     </div>
     <div class="container-fluid mb-4 mt-4" id="heading">
-      <h5 id="headingText">Here is a summary of your designs:</h5>
+      <h5 class="bodyText">Digest of the most recent reviews:</h5>
     </div>
     <div class="col-12 container-fluid" id="body">
       {% for uri in designs_dict %}
-      <div class="card mb-2">
-        <div class="card-body">
-          <h4>{{designs_dict[uri][reviews]|length}} new comments on <a href="https://www.honey-boba.com/uploaded/{{uri}}">{{designs_dict[uri]['name']}}</a></h4>
-        </div>
-      </div>
+        {% if designs_dict[uri]['reviews']|length > 0 %}
+          <div class="card mb-2">
+            <div class="card-body">
+                {% if designs_dict[uri]['name'] %}
+                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.honey-boba.com/uploaded/{{uri}}">{{designs_dict[uri]['name']}}</a></h5>
+                {% else %}
+                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.honey-boba.com/uploaded/{{uri}}">this</a></h5>
+                {% endif %}
+            </div>
+          </div>
+        {% endif %}
       {% endfor %}
     </div>
     <div class="col-12 d-flex justify-content-end" id="footer">
-      <small>One boba a day.</small>
+      <small class="text-muted">One boba a day.</small>
     </div>
   </body>
 </html>

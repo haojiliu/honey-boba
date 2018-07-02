@@ -7,7 +7,8 @@
     </div>
     <div class="col-6">
       <div v-if="!isDeleted">
-        <button id="deleteButton" @click="onDelete" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
+        <button v-if="isEmailConfirmed" id="deleteButton" @click="onDelete" class="btn btn-outline-danger float-right" role="button">Delete It!</button>
+        <button v-else id="deleteButton" @click="onDelete" class="btn btn-outline-danger float-right" role="button" disabled>Delete It!</button>
       </div>
       <div v-else>
         <p class="float-right text-success">Deleted</p>
@@ -21,7 +22,7 @@ import axios from 'axios'
 
 export default {
   name: 'DeleteDesignWidget',
-  props: ['designJson'],
+  props: ['designJson', 'isEmailConfirmed'],
   data () {
     return {
       isDeleted: false
@@ -34,7 +35,7 @@ export default {
       return formData
     },
     onDelete () {
-      if (confirm('Are you sure you want to delete this design?')) {
+      if (confirm('The design will be removed from this website')) {
         var that = this
         console.log('going to delete a design')
         var formData = this._prepareDeleteFormData()

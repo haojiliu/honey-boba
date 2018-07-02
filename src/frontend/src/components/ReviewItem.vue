@@ -13,6 +13,7 @@ export default {
 <style strict>
 .list-group-item {
   padding-bottom: 0;
+  padding-top: 0.5rem;
 }
 #reviewItemTimestamp {
   font-size: 13px;

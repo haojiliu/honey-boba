@@ -16,7 +16,7 @@ export default {
 
 <style strict>
 #app {
-  font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', 'PT Serif', 'Slabo', 'PT Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -32,7 +32,6 @@ p {
 html {
   font-size: 1rem;
 }
-
 @include media-breakpoint-up(sm) {
   html {
     font-size: 1.2rem;

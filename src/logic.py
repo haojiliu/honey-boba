@@ -1,5 +1,5 @@
 from datetime import date
-import time, datetime
+import time, datetime, logging
 
 from model import Notification, Review, ReviewObject, Thumbnail, Comment, User
 
@@ -21,8 +21,8 @@ def create_a_comment(body):
       o.body = body
       s.add(o)
     return ''
-  except:
-    raise
+  except Exception as e:
+    logging.warning(e)
     return 'Write a comments failed'
 
 def get_reviews(uris=None, timestamp=None):
@@ -71,7 +71,7 @@ def get_all_active_designs(uris=None):
             new_design['thumbnail_uri'] = utils.build_thumbnail_filepath(
                 thumbnail.review_object_uri, thumbnail.filename)
         context.append(new_design)
-    print(context)
+    logging.warning(context)
     return context
   except:
     raise
@@ -102,7 +102,7 @@ def touch_thumbnail(review_object_uri, filename, size_code):
         o = Thumbnail()
       else:
         o = o[0]
-        print('updating existing thumbnail')
+        logging.warning('updating existing thumbnail')
       o.review_object_uri = review_object_uri
       o.filename = filename
       o.size_code = size_code
@@ -117,7 +117,7 @@ def touch_thumbnail(review_object_uri, filename, size_code):
 def touch_user(s, email):
   o = _get_user_by_email(s, email)
   if not o:
-    print('user not exist, creating a new one...')
+    logging.warning('user not exist, creating a new one...')
     o = User()
     o.email = email
     # touch time
@@ -135,20 +135,20 @@ def touch_review_object(uri, filename=None, email=None, name=None, description=N
         o = ReviewObject()
       else:
         o = o[0]
-        print('updating existing design')
+        logging.warning('updating existing design')
       if filename:
-        print('updating filename!!')
+        logging.warning('updating filename!!')
         o.filename = filename
       # always update name and desc
-      print('updating desc!')
+      logging.warning('updating desc!')
       o.description = description
-      print('updating name!')
+      logging.warning('updating name!')
       o.name = name
 
       if not o.uri:
         o.uri = uri
       else:
-        print('not updating uri for existing design')
+        logging.warning('not updating uri for existing design')
       # touch time
       o.updated_at_utc = time.time()
 
@@ -156,7 +156,7 @@ def touch_review_object(uri, filename=None, email=None, name=None, description=N
       if email:
         user = touch_user(s, email)
         o.uid = user.id
-        print('the user id is: %s' % o.uid)
+        logging.warning('the user id is: %s' % o.uid)
       s.add(o)
     return 'touch design succeeded'
   except:
@@ -207,7 +207,7 @@ def _get_reviews(session, uris, timestamp):
 def get_email_by_uid(uid):
   with create_session() as session:
     q = session.query(User)
-    q = q.filter(Review.id == uid)
+    q = q.filter(User.id == uid)
     user = q.first()
     return user.email if user else ''
 

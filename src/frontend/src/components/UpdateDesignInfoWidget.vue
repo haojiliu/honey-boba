@@ -1,23 +1,23 @@
 <template>
   <div class="card card-body mx-auto d-block">
-    {{desc}}
     <div class="row d-flex align-items-top">
       <div class="col-12 mb-2">
         <small class="text-muted">Name:</small>
-        <input v-model="name" v-validate="'required'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design">
+        <input v-model="name" v-validate="'alpha_spaces'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('name') }}</small>
       </div>
       <div class="col-12 mb-2">
         <small class="text-muted">Description:</small>
-        <input v-model="desc" type="text" name="desc" class="form-control" placeholder="Anything you want to say about this design">
+        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Anything about this design [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>
       <div class="col-12">
-        <button id='updateButton' class="btn btn-dark btn-block" @click="onUpdate">Update Info</button>
+        <button v-if="isEmailConfirmed" id='updateButton' class="btn btn-dark btn-block" @click="onUpdate">Update Info</button>
+        <button v-else id='updateButton' class="btn btn-dark btn-block" @click="onUpdate" disabled>Update Info</button>
         <div v-if="errorMsg.length === 0 && updatedAt">
-          <p class="float-right text-success">Updated at: {{updatedAt}}</p>
+          <p class="float-right text-success">Updated</p>
         </div>
         <div v-if="errorMsg.length > 0">
           <p class="float-right text-danger">{{errorMsg}}</p>
@@ -27,19 +27,15 @@
   </div>
 </template>
 <script>
-import ReviewWidget from './ReviewWidget'
-import DesignUploader from './DesignUploader'
-import DesignItem from './DesignItem'
-import EmailConfirmation from './EmailConfirmation'
 import axios from 'axios'
 
 export default {
   name: 'UpdateDesignInfoWidget',
-  props: ['designJson'],
+  props: ['designJson', 'isEmailConfirmed'],
   data () {
     return {
       errorMsg: '',
-      updatedAt: '',
+      updatedAt: ''
     }
   },
   computed: {
@@ -81,6 +77,7 @@ export default {
       return formData
     },
     onUpdate () {
+      this.errorMsg = ''
       this.$validator.validateAll().then(result => {
         if (!result) {
           // do stuff if not valid.
@@ -108,5 +105,6 @@ export default {
 <style strict>
 #updateButton {
   border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.93);
 }
 </style>

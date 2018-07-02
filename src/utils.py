@@ -1,5 +1,5 @@
 # Haoji Liu
-import os, sys, datetime, time
+import os, sys, datetime, time, logging
 from PIL import Image
 import constants
 
@@ -27,18 +27,18 @@ def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_filepath = os.path.join(output_dir, output_filename)
-  print('thumbnailing %s to output %s' % (size_tuple, output_filepath))
+  logging.warning('thumbnailing %s to output %s' % (size_tuple, output_filepath))
   try:
     im = Image.open(input_filepath)
-    print(im.format)
+    logging.warning(im.format)
     im = color_conversion(im)
     im.thumbnail(size_tuple)
     im.save(output_filepath, "JPEG")
-    print('saved to jpeg!!')
+    logging.warning('saved to jpeg!!')
     return output_filename
   except IOError:
     raise
-    print("cannot create thumbnail for %s" % input_filepath)
+    logging.warning("cannot create thumbnail for %s" % input_filepath)
 
 def generate_random_string(size):
   return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(size))

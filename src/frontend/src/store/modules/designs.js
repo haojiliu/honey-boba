@@ -37,11 +37,8 @@ const actions = {
 // mutations
 const mutations = {
   touchThumbnail (state, uri) {
-    console.log('touching thumbnail ...')
     const design = state.all.find(design => design.uri === uri)
-    console.log(design)
     design.thumbnail_uri += '?' + new Date().getTime()
-    console.log(design.thumbnail_uri)
   },
   setDesigns (state, designs) {
     state.all = designs

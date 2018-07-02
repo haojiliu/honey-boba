@@ -52,6 +52,7 @@ export default {
             that.reviewText = ''
             console.log(resp.data)
             console.log('post review succeeded')
+            that.$emit('newReviewPosted', that.uri)
           }).catch(function (resp) {
             console.log('FAILURE!!')
           })
@@ -66,7 +67,7 @@ export default {
   border-radius: 0;
 }
 #send {
-  /* border-radius: 0; */
+  border-radius: 0;
 }
 #newReview {
   padding-top: 5px;

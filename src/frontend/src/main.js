@@ -7,6 +7,8 @@ import store from './store'
 import VeeValidate from 'vee-validate'
 import VueTextareaAutosize from 'vue-textarea-autosize'
 
+NProgress.configure({ showSpinner: false })
+
 Vue.use(VeeValidate, {
   events: ''
 })

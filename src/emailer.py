@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import smtplib
+import smtplib, logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import  MIMEText
 
@@ -26,8 +26,8 @@ def send_html(receivers, subject, body):
   txt = msg.as_string()
   try:
     server.sendmail(sender, receivers, txt)
-    print("Successfully sent email")
+    logging.warning("Successfully sent email")
     return True
   except:
-    print("Error: unable to send email")
+    logging.warning("Error: unable to send email")
     return False

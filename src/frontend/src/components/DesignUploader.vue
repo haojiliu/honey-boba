@@ -1,13 +1,13 @@
 <template>
-  <div class="card card-body mx-auto d-block">
+  <div class="designUploadCard card card-body mx-auto d-block">
     <div v-if="!this.$route.params.uri" class="row d-flex align-items-top">
       <div class="col-12 mb-2">
-        <input v-model="name" v-validate="'required'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design">
+        <input v-model="name" v-validate="'alpha_spaces'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('name') }}</small>
       </div>
       <div class="col-12 mb-2">
-        <input v-model="desc" type="text" name="desc" class="form-control" placeholder="Anything you want to say about this design">
+        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Anything about this design [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>
@@ -15,7 +15,7 @@
         <input v-model="email" v-validate="'required|email'" type="email" name="email" class="form-control" placeholder="Enter email">
         <small class="text-danger">{{ errors.first('email') }}</small>
         <input v-model="emailConfirmation" type="email" name="confirmEmail" class="form-control mt-1" placeholder="Confirm your email">
-        <small v-if="emailConfirmation !== email" class="text-danger">Doesn't match your email above</small>
+        <small v-if="emailConfirmation !== email" class="text-danger">Email doesn't match</small>
         <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else. Enter if you want to receive notifications when other people comment on this design</small>
       </div>
     </div>
@@ -31,10 +31,11 @@
       </div>
       <div class="col-12">
         <button v-if="!this.$route.params.uri" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
-        <button v-else id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Update File</button>
+        <button v-if="this.$route.params.uri&&this.isEmailConfirmed" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Update File</button>
+        <button v-if="this.$route.params.uri&&!this.isEmailConfirmed" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile" disabled>Update File</button>
         <div v-if="errorMsg.length === 0 && lastUploadAt">
           <p v-if="!this.$route.params.uri" class="float-right text-success">Submitted at: {{lastUploadAt}}</p>
-          <p v-else class="float-right text-success">Updated at: {{lastUploadAt}}</p>
+          <p v-else class="float-right text-success">Updated</p>
         </div>
         <div v-if="errorMsg.length>0">
           <p class="float-right text-danger">{{errorMsg}}</p>
@@ -49,6 +50,7 @@ import VueRecaptcha from 'vue-recaptcha'
 
 export default {
   name: 'DesignUploader',
+  props: ['isEmailConfirmed'],
   components: { VueRecaptcha },
   computed: {
     uri () {
@@ -83,12 +85,12 @@ export default {
       formData.append('file', this.file)
       formData.append('email', this.email)
       formData.append('name', this.name)
+      formData.append('desc', this.desc)
       formData.append('uri', this.uri)
       formData.append('g-recaptcha-response', this.gRecaptchaResp)
       return formData
     },
     uploadFile () {
-      this.$emit('fileUpdated')
       if (this.emailConfirmation !== this.email) {
         return
       }
@@ -138,5 +140,9 @@ export default {
 <style>
 #uploadButton {
   border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.93);
+}
+.designUploadCard {
+  /* border: 0; */
 }
 </style>

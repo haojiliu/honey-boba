@@ -2,11 +2,11 @@
   <div class="card card-body mx-auto d-block">
     <div class="row d-flex align-items-top">
       <div class="col-8">
-        <input v-model="email" name="email" v-validate="'required|email'" type="email" class="form-control" placeholder="Confirm your email first">
+        <input v-model="email" name="email" v-validate="'required|email'" type="email" class="form-control" placeholder="Verify your email first">
         <div>
           <small class="text-danger">{{ errors.first('email') }}</small>
         </div>
-        <small class="text-muted">Let's make sure it's your design</small>
+        <!-- <small class="text-muted">Let's make sure it's your design</small> -->
       </div>
       <div class="col-4">
         <div v-if="!isEmailConfirmed">
@@ -44,6 +44,7 @@ export default {
       return formData
     },
     onConfirmEmail () {
+      this.errorMsg = ''
       this.$validator.validateAll().then(result => {
         if (!result) {
           // do stuff if not valid.
@@ -65,7 +66,7 @@ export default {
           })
         }
       })
-    },
+    }
   }
 }
 </script>

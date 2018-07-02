@@ -1,5 +1,5 @@
 # Haoji Liu
-import os, sys, uuid, json
+import os, sys, uuid, json, logging
 
 import requests, jsonify
 
@@ -18,18 +18,21 @@ from flask_cors import CORS
 
 import zmq
 
-context = zmq.Context()
-connect_string = 'tcp://{}:{}'.format(
-    constants.zmq_event_host, constants.event_pub_port)
-socket = context.socket(zmq.PUB)
-socket.connect(connect_string)
-print('connect to %s' % connect_string)
+try:
+  context = zmq.Context()
+  connect_string = 'tcp://{}:{}'.format(
+      constants.zmq_event_host, constants.event_pub_port)
+  socket = context.socket(zmq.PUB)
+  socket.connect(connect_string)
+  logging.warning('connected to %s' % connect_string)
+except:
+  logging.warning('not able to connect to the socket')
 
 # Instantiate the Node
 app = Flask(__name__,
             static_folder = "./dist/static",
             template_folder = "./dist")
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_FILE_SIZE
 app.config['UPLOAD_FOLDER'] = constants.UPLOAD_FOLDER
@@ -150,7 +153,7 @@ def api_update():
     uri = utils.sanitize_user_input(request.form.get('uri'))
     name = utils.sanitize_user_input(request.form.get('name'))
     desc = utils.sanitize_user_input(request.form.get('desc'))
-    print('uri is %s desc is %s and name is %s' % (uri, desc, name))
+    logging.warning('uri is %s desc is %s and name is %s' % (uri, desc, name))
     l.touch_review_object(uri, None, None, name, desc)
     return jsonify({
       'status': 0,
@@ -173,15 +176,15 @@ def api_upload():
     name = utils.sanitize_user_input(request.form.get('name'))
     desc = utils.sanitize_user_input(request.form.get('desc'))
     if not uri and not recaptcha():
-      error_msg = 'You failed the gRecaptcha test'
+      error_msg = 'Are you a robot?'
     else:
       error_msg, uri = _touch_file(uri, email, name, desc)
       assert not (error_msg and uri), 'Either error message or uri, not both'
       # if file successfully uploaded, send an email
       if not error_msg:
-        print('no error message')
+        logging.warning('no error message')
         if email:
-          print('going to send an email')
+          logging.warning('going to send an email')
           payload = {
             'type': 0,
             'receivers': [email],
@@ -207,8 +210,8 @@ def api_auth_email():
   """
   email = utils.sanitize_user_input(request.form.get('email'))
   uid = utils.sanitize_user_input(request.form.get('uid'))
-  print('email: %s, uid: %s' % (email, uid))
   true_email = l.get_email_by_uid(uid=uid)
+  logging.warning('true email: %s email: %s, uid: %s' % (true_email, email, uid))
   return jsonify({
     'status': 0 if email == true_email else 1,
     'errors': 'Failed, please try again.'
@@ -251,8 +254,10 @@ def api_dev():
   })
 
 if __name__ == '__main__':
+  IS_DEV = False
   if len(sys.argv) == 2:
     p = sys.argv[1]
   else:
     p = 5000
-  app.run(host='0.0.0.0', port=int(p), debug=True)
+    IS_DEV = True
+  app.run(host='0.0.0.0', port=int(p), debug=IS_DEV)
