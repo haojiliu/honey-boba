@@ -7,7 +7,7 @@
         <small class="text-danger">{{ errors.first('name') }}</small>
       </div>
       <div class="col-12 mb-2">
-        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Anything about this design [Optional]">
+        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Description [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>
@@ -75,10 +75,8 @@ export default {
   },
   methods: {
     onVerify (response) {
-      console.log(response)
       this.isRecaptchaVerified = true
       this.gRecaptchaResp = response
-      console.log('recaptcha verified!')
     },
     _prepareFormData () {
       let formData = new FormData()
@@ -109,15 +107,12 @@ export default {
               }
             }
           ).then(function (resp) {
-            console.log(resp.data)
             if (resp.data.status === 0) {
               NProgress.done()
               // redirect only on /upload new ones, not update existing ones
               if (that.uri.length === 0) {
-                console.log('switching view!')
                 that.$router.push('/uploaded/' + resp.data.uri + '/i')
               } else {
-                console.log('not switching view!')
                 that.lastUploadAt = new Date(Date.now())
                 that.$emit('fileUpdated')
               }

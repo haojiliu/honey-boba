@@ -1,32 +1,37 @@
-# honey-boba
+# AnonBeta
 
-# Create docker image:
-docker-compose build --no-cache
+# Create prod docker image:
+docker-compose build prod --no-cache
 docker tag honey-boba_app:latest divid86391/design-review:latest
 docker push divid86391/design-review
 
-# Deploy steps:
-- launch a instance
+# Create dev docker image:
+docker-compose build dev
+docker-compose up -d dev
+
+# AWS Deploy steps:
+- launch an instance
 - install docker
 - sudo docker login
 - sudo docker pull divid86391/design-review:latest
-- sudo docker run -d -p 80:80 -p 9002:9002 --name app divid86391/design-review:latest
+- sudo docker run -d -p 80:80 -p 9002:9002 --v /tmp:/srv/vol --name app divid86391/design-review:0.2a
+
+- scp -i ~/src/haoji_liu_personal.pem app_prod.db ubuntu@34.201.36.179:/tmp/
+app_prod.db                      
 
 # TODOs before release:
-- register a domain name
-- register an email
-- deploy to aws
 
-# TODOs after release:
+- set up dev vs prod global vars
 - enable google analytics
 - timezone should change according to client side timezone
+- remove console prints on the front end
 
+# TODOs after release:
 - move thumbnails and original images to s3
-- move database out into a volume
-- make a logo
-- run flask in production
+- move database write out into a volume
 - move to https
 
+- switch to nginx and uwsgi
 
 - switch from using User.id to User.uid
 - research on how cookie or token can be used to remember some info like "auth'd on this computer already, or submitted XYZ on this computer..."
@@ -36,10 +41,14 @@ docker push divid86391/design-review
 - upload the same form again
 - upload the same review again
 
+- make a logo
+
 - log rotation
 
 - drag and drop instead of a CHOOSE FILE button
 - implement lazyloading
+- implement masonry style
+- implement tags, filter/search
 - move getter methods from logic to model
 
 

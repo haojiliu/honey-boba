@@ -2,8 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
+import constants
 
-engine = create_engine('sqlite:///app.db')
+engine = create_engine('sqlite:///%s' % constants.DB_PATH)
 
 Base = declarative_base()
 Base.metadata.create_all(engine)

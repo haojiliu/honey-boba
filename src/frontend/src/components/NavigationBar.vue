@@ -1,7 +1,8 @@
 <template>
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-    <router-link class="navbar-brand" to="/"><img class="align-middle" src="https://s3.amazonaws.com/haoji/design-review/static/logo.png" width="30" alt="">
-      <span class="align-middle navBrand">Honey Boba</span>
+    <router-link class="navbar-brand" to="/">
+      <!-- <img class="align-middle" src="https://s3.amazonaws.com/haoji/design-review/static/logo.png" width="30" alt=""> -->
+      <span class="align-middle navBrand">AnonBeta</span>
     </router-link>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

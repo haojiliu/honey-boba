@@ -1,10 +1,35 @@
-BASE_DIR_DEV = '/Users/haojiliu/src/honey-boba/'
-BASE_DIR_PROD = '/srv/'
+# import yaml file as modules
+########################
+# TODO: move this part out to a bootstrap file
+import yaml
+import os
 
-UPLOAD_FOLDER = BASE_DIR_PROD + 'uploaded_files'
+MODE = os.environ.get('ANONBETA_MODE')
+
+if MODE == 'DEV':
+  config_yaml_path = '../config/dev.yaml'
+elif MODE == 'PROD':
+  config_yaml_path = '/srv/config/prod.yaml'
+else:
+  config_yaml_path = '../config/dev.yaml'
+
+GLOBAL_CONFIG = {}
+with open(config_yaml_path, 'r') as stream:
+  try:
+    GLOBAL_CONFIG = yaml.load(stream)
+  except yaml.YAMLError as exc:
+    print(exc)
+
+print(GLOBAL_CONFIG)
+
+DB_PATH = GLOBAL_CONFIG.get('DB_PATH', 'app.db')
+BASE_DIR = GLOBAL_CONFIG.get('BASE_DIR', '/Users/haojiliu/src/honey-boba/')
+
+#######################
+UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
 
 THUMBNAIL_FOLDER = '/static/thumbnail/designs'
-THUMBNAIL_FULL_DIR = BASE_DIR_PROD + 'src/static/thumbnail/designs'
+THUMBNAIL_FULL_DIR = BASE_DIR + 'src/static/thumbnail/designs'
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -31,11 +56,11 @@ CONST_SKU_PREFIX_DEFAULT = 'ABC'
 CONST_GOOGLE_RECAPTCHA_SITE_KEY = '6LcwUV8UAAAAAJo2f_MbbAbJTdr8xFpw1T4Naxpy'
 CONST_GOOGLE_RECAPTCHA_SECRET_KEY = '6LcwUV8UAAAAAKIgLoONyXdp9G6rCVzQRMZgxVfE'
 
-CONST_EMAILER_SENDER = 'divid86391@gmail.com'
-CONST_EMAILER_PASSWORD = '1949101Saruman'
+CONST_EMAILER_SENDER = 'notifications@anonbeta.com'
+CONST_EMAILER_PASSWORD = '1949101_Saruman'
 
-CONST_DESIGN_URL = 'http://www.honey-boba.com/uploaded/%s'
-CONST_EMAIL_DIGEST_INTERVAL_IN_SECONDS = 3600 # Send digest email per hour
+CONST_DESIGN_URL = 'http://www.anonbeta.com/uploaded/%s'
+CONST_EMAIL_DIGEST_INTERVAL_IN_SECONDS = 3600 * 24 # Send digest email per hour
 
 zmq_event_host = '0.0.0.0'
 event_pub_port = 8081

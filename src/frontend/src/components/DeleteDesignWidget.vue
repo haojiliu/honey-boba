@@ -37,7 +37,6 @@ export default {
     onDelete () {
       if (confirm('The design will be removed from this website')) {
         var that = this
-        console.log('going to delete a design')
         var formData = this._prepareDeleteFormData()
         axios.post('/api/delete',
           formData

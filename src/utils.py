@@ -40,6 +40,10 @@ def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
     raise
     logging.warning("cannot create thumbnail for %s" % input_filepath)
 
+  if constants.MODE == 'PROD':
+    pass
+    # TODO: upload to s3
+
 def generate_random_string(size):
   return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(size))
 

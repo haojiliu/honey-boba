@@ -7,3 +7,4 @@ Pillow
 jsonify
 flask-cors
 zmq
+pyyaml

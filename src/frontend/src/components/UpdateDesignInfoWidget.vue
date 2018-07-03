@@ -9,7 +9,7 @@
       </div>
       <div class="col-12 mb-2">
         <small class="text-muted">Description:</small>
-        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Anything about this design [Optional]">
+        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Description [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>
@@ -87,7 +87,6 @@ export default {
           axios.post('/api/update',
             formData
           ).then(function (resp) {
-            console.log(resp.data)
             if (resp.data.status === 0) {
               that.updatedAt = new Date(Date.now())
             } else {

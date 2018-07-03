@@ -50,7 +50,6 @@ const mutations = {
   setOneReview (state, dataObj) {
     const design = state.all.find(design => design.uri === dataObj.uri)
     design.reviews = dataObj.reviews
-    console.log(state.all)
   },
   setDesc (state, payload) {
     const design = state.all.find(design => design.uri === payload.uri)

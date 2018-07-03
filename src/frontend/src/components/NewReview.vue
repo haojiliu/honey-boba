@@ -50,8 +50,6 @@ export default {
           ).then(function (resp) {
             that.$store.dispatch('designs/refreshOneReview', that.uri)
             that.reviewText = ''
-            console.log(resp.data)
-            console.log('post review succeeded')
             that.$emit('newReviewPosted', that.uri)
           }).catch(function (resp) {
             console.log('FAILURE!!')

@@ -130,6 +130,11 @@ def _handle_file_upload(file, uri=None):
     os.makedirs(fdir)
   fpath = safe_join(fdir, filename)
   file.save(fpath)
+
+  if constants.MODE == 'PROD':
+    pass
+    # TODO: upload to s3
+
   l.thumbnail(fpath, uri)
   return {'uri': uri, 'filename': filename}
 
@@ -248,16 +253,36 @@ def api_dev():
   """
   body = utils.sanitize_user_input(request.form.get('body'))
   error_msg = l.create_a_comment(body=body)
+  logging.warning('comments: %s' % body)
   return jsonify({
     'status': 0 if not error_msg else 1,
     'error_msg': error_msg
   })
 
+@app.route('/dev/db/haoji', methods=['GET'])
+def dev_db_viewer():
+  """
+  For dev debug only
+  """
+  context = {
+    'tables': [
+      {
+        'comment': [],
+        'user': [],
+        'review': [],
+        'thumbnail': []
+      }
+    ]
+  }
+  return render_template("index.html", context=context)
+
 if __name__ == '__main__':
-  IS_DEV = False
-  if len(sys.argv) == 2:
+  IS_DEV = constants.MODE == 'DEV'
+  if IS_DEV:
+    p = 5000
+  elif len(sys.argv) == 2:
     p = sys.argv[1]
   else:
     p = 5000
-    IS_DEV = True
+  print('is in dev mode? %s' % IS_DEV)
   app.run(host='0.0.0.0', port=int(p), debug=IS_DEV)

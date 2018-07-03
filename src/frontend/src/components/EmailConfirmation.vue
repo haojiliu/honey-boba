@@ -2,7 +2,7 @@
   <div class="card card-body mx-auto d-block">
     <div class="row d-flex align-items-top">
       <div class="col-8">
-        <input v-model="email" name="email" v-validate="'required|email'" type="email" class="form-control" placeholder="Verify your email first">
+        <input v-model="email" name="email" v-validate="'required|email'" type="email" class="form-control" placeholder="Enter the email used for this design">
         <div>
           <small class="text-danger">{{ errors.first('email') }}</small>
         </div>
@@ -54,7 +54,6 @@ export default {
           axios.post('/api/auth/email',
             formData
           ).then(function (resp) {
-            console.log(resp.data)
             if (resp.data.status === 0) {
               that.isEmailConfirmed = true
               that.$emit('emailConfirmed')

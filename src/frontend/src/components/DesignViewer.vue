@@ -33,42 +33,18 @@ export default {
       reviewEl.$el.scrollIntoViewIfNeeded()
     },
   },
-  beforeRouteEnter (to, from, next) {
-    // called before the route that renders this component is confirmed.
-    // does NOT have access to `this` component instance,
-    // because it has not been created yet when this guard is called!
-    console.log('before route enters design viewer!!')
-    next(vm => {
-      console.log(vm.$store.state.designs.isFetched)
-    })
-  },
   computed: {
     designsJson () {
       return this.$store.state.designs.all
     }
   },
   beforeCreate () {
-    console.log('before creating design viewer component')
   },
   created () {
-    console.log('design viewer created')
     if (!this.$store.state.designs.isFetched) {
       this.$store.dispatch('designs/initAllDesigns')
     } else {
-      console.log('already fetched, not making api call to flask')
     }
-  },
-  beforeMount () {
-    console.log('before mount...')
-  },
-  mounted () {
-    console.log('design viewer mounted')
-  },
-  destroyed () {
-    console.log('design viewer destroyed')
-  },
-  beforeDestroy () {
-    console.log('design viewer about to be destroyed')
   }
 }
 </script>

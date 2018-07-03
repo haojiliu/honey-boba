@@ -13,9 +13,9 @@ new_upload_template = env.get_template('notification_new_upload.html')
 
 def send_html(receivers, subject, body):
   sender = constants.CONST_EMAILER_SENDER
-  server = smtplib.SMTP('smtp.gmail.com', 587)
-  server.ehlo()
-  server.starttls()
+  server = smtplib.SMTP_SSL('smtp.zoho.com', 465)
+  # server.ehlo()
+  # server.starttls()
   server.login(sender, constants.CONST_EMAILER_PASSWORD)
 
   msg = MIMEMultipart()

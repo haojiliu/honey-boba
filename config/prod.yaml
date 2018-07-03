@@ -1,0 +1,3 @@
+BASE_DIR: '/srv/'
+DB_PATH: '/srv/vol/app.db'
+S3_BUCKET: ''

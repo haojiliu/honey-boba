@@ -25,22 +25,22 @@
   <body>
     <div class="col-12 d-flex justify-content-center align-items-center" id="topBanner">
       <h1 id="titleText">
-        <strong>Honey Boba</strong>
+        <strong>AnonBeta</strong>
         <small id="secondaryTitle"class="text-muted">Always Anonymous</small>
       </h1>
     </div>
-    <div class="container-fluid mb-4 mt-4" id="heading">
+    <!-- <div class="container-fluid mb-4 mt-4" id="heading">
       <h5 class="bodyText">Digest of the most recent reviews:</h5>
-    </div>
+    </div> -->
     <div class="col-12 container-fluid" id="body">
       {% for uri in designs_dict %}
         {% if designs_dict[uri]['reviews']|length > 0 %}
           <div class="card mb-2">
             <div class="card-body">
                 {% if designs_dict[uri]['name'] %}
-                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.honey-boba.com/uploaded/{{uri}}">{{designs_dict[uri]['name']}}</a></h5>
+                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.anonbeta.com/uploaded/{{uri}}">{{designs_dict[uri]['name']}}</a></h5>
                 {% else %}
-                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.honey-boba.com/uploaded/{{uri}}">this</a></h5>
+                <h5 class="bodyText">{{designs_dict[uri]['reviews']|length}} new comment(s) on <a href="https://www.anonbeta.com/uploaded/{{uri}}">this</a></h5>
                 {% endif %}
             </div>
           </div>
@@ -48,7 +48,7 @@
       {% endfor %}
     </div>
     <div class="col-12 d-flex justify-content-end" id="footer">
-      <small class="text-muted">One boba a day.</small>
+      <small class="text-muted">2018. All Rights Reserved</small>
     </div>
   </body>
 </html>

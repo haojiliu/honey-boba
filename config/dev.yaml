@@ -1,0 +1,2 @@
+BASE_DIR: '/Users/haojiliu/src/honey-boba/'
+DB_PATH: 'app.db'

@@ -12,7 +12,7 @@
           <div class="row d-flex align-items-top">
             <div class="col-12">
               <!-- <p v-if="this.isFileUpdated" class="lead"><strong>Your file was updated</strong></p> -->
-              <p v-if="!this.isFileUpdated && this.$route.params.slug" class="lead" style="font-family:'Lobster'"><strong>Congrats on the new upload!</strong></p>
+              <p v-if="!this.isFileUpdated && this.$route.params.slug" class="" style="font-family:'Encode Sans Condensed'">Congratulations! Make sure to save this link for future reference. An email will be sent to you shortly.</p>
               <!-- <p v-if="!this.isFileUpdated && !this.$route.params.slug" class="lead"><strong><em>STOP! Make sure this is your design before making any changes</em></strong></p> -->
             </div>
           </div>

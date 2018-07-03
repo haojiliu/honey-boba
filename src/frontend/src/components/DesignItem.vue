@@ -22,7 +22,6 @@ export default {
   watch: {
     designJson: function (newVal, oldVal) { // watch it
       // Re-render the reviews
-      console.log('inside designItem, val changed!!')
     }
   },
   data () {
@@ -39,13 +38,10 @@ export default {
     onReport () {
       if (confirm('You are going to report an inappropriate design')) {
         var that = this
-        console.log('going to report this design!')
         var formData = this._prepareFormData()
         axios.post('/api/report',
           formData
         ).then(function (resp) {
-          console.log(resp.data)
-          console.log('report a design succeeded')
           that.isReported = true
         }).catch(function (resp) {
           console.log('FAILURE!!')
