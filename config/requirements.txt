@@ -8,3 +8,4 @@ jsonify
 flask-cors
 zmq
 pyyaml
+boto3

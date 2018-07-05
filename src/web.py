@@ -13,6 +13,7 @@ import logic as l
 import utils
 import constants
 import emailer
+import s3
 
 from flask_cors import CORS
 
@@ -32,7 +33,7 @@ except:
 app = Flask(__name__,
             static_folder = "./dist/static",
             template_folder = "./dist")
-# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_FILE_SIZE
 app.config['UPLOAD_FOLDER'] = constants.UPLOAD_FOLDER
@@ -66,16 +67,14 @@ def api_designs():
 @app.route('/api/design/<uri>', methods=['GET'])
 def api_design(uri):
   """Returns: dict"""
-  designs = l.get_all_active_designs(uris=[uri])
-  assert len(designs) <= 1
-  design = designs[0] if designs else {}
+  design = l.get_one_design(uri)
   return jsonify(design)
 
 @app.route('/api/thumbnail/<uri>', methods=['GET'])
 def api_thumbnail(uri):
   """api endpoint to serve all thumbnails"""
-  filename = '1024_by_1024.jpg'
-  filepath = uri + '/' + filename
+  filename = constants.THUMBNAIL_FILENAME
+  filepath = os.path.join(uri, filename)
   return send_from_directory(constants.THUMBNAIL_FULL_DIR, filepath)
 
 def allowed_file(filename):
@@ -118,7 +117,7 @@ def file_upload_sanity_check(uri):
   if not allowed_file(file.filename):
     return 'Only accepting %s file formats' % ' or '.join(constants.ALLOWED_EXTENSIONS)
   if uri:
-    if not l.get_review_objects([uri]):
+    if not l.get_active_review_objects([uri]):
       return 'Design not found'
   return ''
 
@@ -130,42 +129,43 @@ def _handle_file_upload(file, uri=None):
     os.makedirs(fdir)
   fpath = safe_join(fdir, filename)
   file.save(fpath)
-
-  if constants.MODE == 'PROD':
-    pass
-    # TODO: upload to s3
-
-  l.thumbnail(fpath, uri)
-  return {'uri': uri, 'filename': filename}
+  return {'uri': uri, 'filename': filename, 'fpath': fpath}
 
 def _touch_file(uri, email, name, desc):
   error_msg = file_upload_sanity_check(uri)
   if error_msg:
     return error_msg, None
-  # first save the file and thumbnail it
+  # first save the file
   file_info_dict = _handle_file_upload(request.files['file'], uri)
   uri = file_info_dict['uri']
-  # lastly, create a database ORM for it
   filename = file_info_dict['filename']
+  fpath = file_info_dict['fpath']
+  # thumbnail
+  thumbnail_tuples = l.thumbnail(fpath, uri)
+
+  # TODO: enqueue these two jobs to zmq instead
+  # secondly, upload to s3
+  payload = {
+    'type': constants.JOB_TYPE_S3_UPLOAD_ORIGINAL,
+    'uri': uri,
+    'fname': filename,
+    'fpath': fpath
+  }
+  socket.send_json(payload)
+  # upload thumbnail to s3
+  for t in thumbnail_tuples:
+    fname, fpath = t
+    payload = {
+      'type': constants.JOB_TYPE_S3_UPLOAD_THUMBNAIL,
+      'uri': uri,
+      'fname': fname,
+      'fpath': fpath
+    }
+    socket.send_json(payload)
+
+  # lastly, create a database ORM for it
   l.touch_review_object(uri, filename, email, name, desc)
   return error_msg, uri
-
-@app.route('/api/update', methods=['POST'])
-def api_update():
-  """Handles design info update,
-  """
-  try:
-    uri = utils.sanitize_user_input(request.form.get('uri'))
-    name = utils.sanitize_user_input(request.form.get('name'))
-    desc = utils.sanitize_user_input(request.form.get('desc'))
-    logging.warning('uri is %s desc is %s and name is %s' % (uri, desc, name))
-    l.touch_review_object(uri, None, None, name, desc)
-    return jsonify({
-      'status': 0,
-      'errors': ''
-    })
-  except:
-    return jsonify({'status': 1, 'errors': 'Something wrong when updating design info'})
 
 # TODO: use this https://pythonhosted.org/Flask-Uploads/
 @app.route('/api/upload', methods=['POST'])
@@ -191,7 +191,7 @@ def api_upload():
         if email:
           logging.warning('going to send an email')
           payload = {
-            'type': 0,
+            'type': constants.JOB_TYPE_EMAIL_UPLOAD_SUCCESS,
             'receivers': [email],
             'uri': uri,
             'name': name
@@ -205,8 +205,25 @@ def api_upload():
       'errors': error_msg,
       'uri': uri
     })
-  except RequestEntityTooLarge:
-    return jsonify({'status': 1, 'errors': 'File too large, please downsize and try again.'})
+  except Exception as e:
+    return jsonify({'status': 1, 'errors': str(e)})
+
+@app.route('/api/update', methods=['POST'])
+def api_design_info_update():
+  """Handles design info update,
+  """
+  try:
+    uri = utils.sanitize_user_input(request.form.get('uri'))
+    name = utils.sanitize_user_input(request.form.get('name'))
+    desc = utils.sanitize_user_input(request.form.get('desc'))
+    logging.warning('uri is %s desc is %s and name is %s' % (uri, desc, name))
+    l.touch_review_object(uri, None, None, name, desc)
+    return jsonify({
+      'status': 0,
+      'errors': ''
+    })
+  except:
+    return jsonify({'status': 1, 'errors': 'Something wrong when updating design info'})
 
 @app.route('/api/auth/email', methods=['POST'])
 def api_auth_email():
@@ -229,6 +246,18 @@ def api_delete():
   """
   uri = utils.sanitize_user_input(request.form.get('uri'))
   error_msg = l.delete_review_objects(uris=[uri])
+  return jsonify({
+    'status': 0 if not error_msg else 1,
+    'error_msg': error_msg
+  })
+
+@app.route('/api/activate', methods=['POST'])
+def api_activate():
+  """
+  This is the endpoint to delete the uploaded design
+  """
+  uri = utils.sanitize_user_input(request.form.get('uri'))
+  error_msg = l.activate_review_objects(uris=[uri])
   return jsonify({
     'status': 0 if not error_msg else 1,
     'error_msg': error_msg
@@ -277,7 +306,7 @@ def dev_db_viewer():
   return render_template("index.html", context=context)
 
 if __name__ == '__main__':
-  IS_DEV = constants.MODE == 'DEV'
+  IS_DEV = constants.MODE != 'PROD'
   if IS_DEV:
     p = 5000
   elif len(sys.argv) == 2:

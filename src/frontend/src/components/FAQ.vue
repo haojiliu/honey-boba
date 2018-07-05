@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="faqCard card card-body mr-auto d-block">
       <h2>Hi</h2>
-      <p>welcome to AnonBeta(anonymous <a target="_blank" href="https://en.wikipedia.org/wiki/Beta_(climbing)">beta</a>), a platform for amateur graphic designers. We support originality and creativity by offering complete Anonymity and Neutrality.</p>
+      <p>welcome to AnonBeta(Anon(ymous)<a target="_blank" href="https://en.wikipedia.org/wiki/Beta_(climbing)">Beta</a>), a platform for amateur graphic designers. We support originality and creativity by offering complete Anonymity and Neutrality.</p>
       <!-- <p>What is <strong>Anonymity</strong>? Well, think about how websites require you to sign up before you can do almost any meaningful things about it? Sites ask for registration really is a good thing, it helps the site to make targeted campaigns easier, better analyze the user behaviors, and planning the strategies accordingly. Users also get the benefits of having a "personal box" on each site they use, at the sacrifice of anonymity, of course. Now the real question is, do you value all the conveniences over anonymity? Let's get behind the company and observe how mant things they are doing behind-the-scene with your "online identity" at their company:</p>
       <p>What is <strong>Neutrality</strong>?</p> -->
     </div>

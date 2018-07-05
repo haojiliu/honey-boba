@@ -1,6 +1,9 @@
 <template>
   <div v-if="this.$store.state.designs.isFetched" class="container-fluid" style="">
-    <div class="oneDesign card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
+    <div v-if="this.$store.state.designs.isMasonry">
+      <masonry-view v-bind:designsJson="designsJson"></masonry-view>
+    </div>
+    <div v-else class="oneDesign card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
       <design-item v-bind:designJson="designJson"></design-item>
       <review-widget :ref="'review-'+designJson.uri" v-bind:uri="designJson.uri" v-bind:reviewsJson="designJson.reviews"></review-widget>
       <new-review v-bind:uri="designJson.uri" @newReviewPosted="onNewReviewPosted"></new-review>
@@ -12,12 +15,14 @@
 import ReviewWidget from './ReviewWidget'
 import NewReview from './NewReview'
 import DesignItem from './DesignItem'
+import MasonryView from './MasonryView'
 
 export default {
   components: {
     ReviewWidget,
     NewReview,
-    DesignItem
+    DesignItem,
+    MasonryView
   },
   methods: {
     onNewReviewPosted (uri) {

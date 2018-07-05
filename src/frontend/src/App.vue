@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <navigation-bar></navigation-bar>
-    <router-view></router-view>
+    <div id="mainWrapper">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 <script>
@@ -20,6 +22,9 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+}
+#mainWrapper {
+  margin-top: 50px;
 }
 .card {
   margin: 20px;

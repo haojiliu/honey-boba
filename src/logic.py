@@ -9,10 +9,13 @@ import constants
 import emailer
 
 def thumbnail(input_filepath, uri):
+  thumbnails = []
   for size_tuple in constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE:
     size_code = constants.THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE[size_tuple]
-    filename = utils.thumbnail(input_filepath, uri, size_tuple)
+    filename, fpath = utils.thumbnail(input_filepath, uri, size_tuple)
     touch_thumbnail(uri, filename, size_code)
+    thumbnails.append((filename, fpath))
+  return thumbnails
 
 def create_a_comment(body):
   try:
@@ -41,6 +44,28 @@ def get_reviews(uris=None, timestamp=None):
     raise
     return 'Failed'
 
+def _build_design_context(design):
+  new_design = {
+    'uri': design.uri,
+    'name': design.name,
+    'desc': design.description,
+    'uid': design.user.id if design.user else None,
+    'updated_at_utc': utils.epoch_to_datetime_string(design.updated_at_utc),
+    'reviews': [],
+    'is_deleted': design.flags & constants.CONST_FLAGS_INACTIVE > 0
+  }
+  for review in design.reviews:
+    new_design['reviews'].append({
+      'body': review.body,
+      'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
+    })
+  new_design['reviews'].reverse()
+  for thumbnail in design.thumbnails:
+    if thumbnail.size_code == constants.SIZE_CODE_LARGE:
+      new_design['thumbnail_uri'] = utils.build_thumbnail_filepath(
+          thumbnail.review_object_uri, thumbnail.filename)
+  return new_design
+
 def get_all_active_designs(uris=None):
   """This is the api endpoint to get all related information for designs
   i.e, reviews, thumbnail image links, user info, upvotes, etc.
@@ -52,27 +77,27 @@ def get_all_active_designs(uris=None):
     with create_session() as s:
       designs = _get_review_objects(s, uris=uris)
       for design in designs:
-        new_design = {
-          'uri': design.uri,
-          'name': design.name,
-          'desc': design.description,
-          'uid': design.user.id if design.user else None,
-          'updated_at_utc': utils.epoch_to_datetime_string(design.updated_at_utc),
-          'reviews': []
-        }
-        for review in design.reviews:
-          new_design['reviews'].append({
-            'body': review.body,
-            'timestamp': utils.epoch_to_datetime_string(review.created_at_utc)
-          })
-        new_design['reviews'].reverse()
-        for thumbnail in design.thumbnails:
-          if thumbnail.size_code == constants.SIZE_CODE_LARGE:
-            new_design['thumbnail_uri'] = utils.build_thumbnail_filepath(
-                thumbnail.review_object_uri, thumbnail.filename)
+        new_design = _build_design_context(design)
         context.append(new_design)
     logging.warning(context)
     return context
+  except:
+    raise
+    return 'Failed'
+
+def get_one_design(uri):
+  """This is the api endpoint to get all related information for designs
+  i.e, reviews, thumbnail image links, user info, upvotes, etc.
+
+  Returns: list of dicts
+  """
+  try:
+    with create_session() as s:
+      designs = _get_review_objects(s, uris=[uri], is_active=False)
+      if designs:
+        return _build_design_context(designs[0])
+      else:
+        return {}
   except:
     raise
     return 'Failed'
@@ -172,10 +197,11 @@ def _get_thumbnail(session, review_object_uris=None, filenames=None):
     q = q.filter(ReviewObject.filename.in_(filenames))
   return q.all()
 
-def _get_review_objects(session, uris):
+def _get_review_objects(session, uris, is_active=True):
   """Return a list of ReviewObject"""
   q = session.query(ReviewObject)
-  q = q.filter(ReviewObject.flags == constants.CONST_FLAGS_ACTIVE)
+  if is_active:
+    q = q.filter(ReviewObject.flags == constants.CONST_FLAGS_ACTIVE)
   if uris:
     q = q.filter(ReviewObject.uri.in_(uris))
   q = q.order_by(ReviewObject.id.desc())
@@ -211,7 +237,7 @@ def get_email_by_uid(uid):
     user = q.first()
     return user.email if user else ''
 
-def get_review_objects(uris=None):
+def get_active_review_objects(uris=None):
   """Return a list of ReviewObject object in strings"""
   with create_session() as s:
     return _get_review_objects(s, uris)
@@ -219,13 +245,23 @@ def get_review_objects(uris=None):
 def delete_review_objects(uris):
   try:
     with create_session() as s:
-      for o in _get_review_objects(s, uris):
-        if o.flags == constants.CONST_FLAGS_INACTIVE:
+      for o in _get_review_objects(s, uris, is_active=False):
+        if o.flags & o.flags | constants.CONST_FLAGS_INACTIVE:
           return 'Design already deleted'
         o.flags = o.flags | constants.CONST_FLAGS_INACTIVE
   except:
     raise
     return 'Delete failed'
+  return ''
+
+def activate_review_objects(uris):
+  try:
+    with create_session() as s:
+      for o in _get_review_objects(s, uris, is_active=False):
+        o.flags = o.flags & ~constants.CONST_FLAGS_INACTIVE
+  except:
+    raise
+    return 'Activate failed'
   return ''
 
 def report_review_objects(uris):

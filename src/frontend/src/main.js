@@ -6,6 +6,12 @@ import router from './router'
 import store from './store'
 import VeeValidate from 'vee-validate'
 import VueTextareaAutosize from 'vue-textarea-autosize'
+import VModal from 'vue-js-modal'
+import {VueMasonryPlugin} from 'vue-masonry'
+
+Vue.use(VModal, { dynamic: true })
+
+Vue.use(VueMasonryPlugin)
 
 NProgress.configure({ showSpinner: false })
 

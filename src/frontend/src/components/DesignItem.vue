@@ -43,6 +43,8 @@ export default {
           formData
         ).then(function (resp) {
           that.isReported = true
+          that.$emit('designReported')
+          that.$store.commit('designs/deleteOneDesign', that.designJson)
         }).catch(function (resp) {
           console.log('FAILURE!!')
         })

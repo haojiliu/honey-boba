@@ -14,8 +14,7 @@
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>
       <div class="col-12">
-        <button v-if="isEmailConfirmed" id='updateButton' class="btn btn-dark btn-block" @click="onUpdate">Update Info</button>
-        <button v-else id='updateButton' class="btn btn-dark btn-block" @click="onUpdate" disabled>Update Info</button>
+        <button id='updateButton' class="btn btn-dark btn-block" @click="onUpdate">Update Info</button>
         <div v-if="errorMsg.length === 0 && updatedAt">
           <p class="float-right text-success">Updated</p>
         </div>
@@ -31,7 +30,7 @@ import axios from 'axios'
 
 export default {
   name: 'UpdateDesignInfoWidget',
-  props: ['designJson', 'isEmailConfirmed'],
+  props: ['designJson'],
   data () {
     return {
       errorMsg: '',

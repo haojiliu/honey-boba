@@ -31,8 +31,7 @@
       </div>
       <div class="col-12">
         <button v-if="!this.$route.params.uri" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Upload</button>
-        <button v-if="this.$route.params.uri&&this.isEmailConfirmed" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Update File</button>
-        <button v-if="this.$route.params.uri&&!this.isEmailConfirmed" id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile" disabled>Update File</button>
+        <button v-else id='uploadButton' class="btn btn-dark btn-block" @click="uploadFile">Update File</button>
         <div v-if="errorMsg.length === 0 && lastUploadAt">
           <p v-if="!this.$route.params.uri" class="float-right text-success">Submitted at: {{lastUploadAt}}</p>
           <p v-else class="float-right text-success">Updated</p>
@@ -50,7 +49,7 @@ import VueRecaptcha from 'vue-recaptcha'
 
 export default {
   name: 'DesignUploader',
-  props: ['isEmailConfirmed'],
+  props: [],
   components: { VueRecaptcha },
   computed: {
     uri () {
@@ -107,8 +106,8 @@ export default {
               }
             }
           ).then(function (resp) {
+            NProgress.done()
             if (resp.data.status === 0) {
-              NProgress.done()
               // redirect only on /upload new ones, not update existing ones
               if (that.uri.length === 0) {
                 that.$router.push('/uploaded/' + resp.data.uri + '/i')

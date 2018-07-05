@@ -8,7 +8,7 @@
         </div>
       </div>
       <div class="col-md-6 hidden-sm">
-        <div v-if="this.$route.params.slug" class="alertCard card card-body mx-auto d-block">
+        <div v-if="!this.isFileUpdated && this.$route.params.slug" class="alertCard card card-body mx-auto d-block">
           <div class="row d-flex align-items-top">
             <div class="col-12">
               <!-- <p v-if="this.isFileUpdated" class="lead"><strong>Your file was updated</strong></p> -->
@@ -19,9 +19,11 @@
         </div>
         <email-confirmation v-bind:designJson="designJson" @emailConfirmed="onEmailConfirmed"></email-confirmation>
         <div v-if="this.isEmailConfirmed">
-          <design-uploader v-bind:isEmailConfirmed="isEmailConfirmed" v-bind:designJson="designJson" @fileUpdated="onFileUpdated"></design-uploader>
-          <update-design-info-widget v-bind:isEmailConfirmed="isEmailConfirmed" v-bind:designJson="designJson"></update-design-info-widget>
-          <delete-design-widget v-bind:isEmailConfirmed="isEmailConfirmed" v-bind:designJson="designJson"></delete-design-widget>
+          <div v-if="!this.isDeleted">
+            <design-uploader v-bind:designJson="designJson" @fileUpdated="onFileUpdated"></design-uploader>
+            <update-design-info-widget v-bind:designJson="designJson"></update-design-info-widget>
+          </div>
+          <delete-design-widget v-bind:designJson="designJson"></delete-design-widget>
         </div>
       </div>
     </div>
@@ -64,6 +66,9 @@ export default {
   computed: {
     designJson () {
       return this.$store.getters['designs/getDesignByUri'](this.$route.params.uri)
+    },
+    isDeleted () {
+      return this.designJson.is_deleted
     }
   },
   methods: {

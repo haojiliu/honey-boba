@@ -16,6 +16,8 @@ docker-compose up -d dev
 - sudo docker pull divid86391/design-review:latest
 - sudo docker run -d -p 80:80 -p 9002:9002 --v /tmp:/srv/vol --name app divid86391/design-review:0.2a
 
+- sudo docker run -d -p 5000:5000 -p 9002:9002 --name app honey-boba_dev:latest
+
 - scp -i ~/src/haoji_liu_personal.pem app_prod.db ubuntu@34.201.36.179:/tmp/
 app_prod.db                      
 

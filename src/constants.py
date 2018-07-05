@@ -23,7 +23,16 @@ with open(config_yaml_path, 'r') as stream:
 print(GLOBAL_CONFIG)
 
 DB_PATH = GLOBAL_CONFIG.get('DB_PATH', 'app.db')
-BASE_DIR = GLOBAL_CONFIG.get('BASE_DIR', '/Users/haojiliu/src/honey-boba/')
+# This is to make local dev work without a docker
+if not MODE:
+  BASE_DIR = '/Users/haojiliu/src/honey-boba/'
+else:
+  BASE_DIR = GLOBAL_CONFIG['BASE_DIR']
+
+S3_BUCKET = GLOBAL_CONFIG['S3_BUCKET']
+AWS_ACCESS_KEY = GLOBAL_CONFIG['AWS_ACCESS_KEY']
+AWS_SECRET_KEY = GLOBAL_CONFIG['AWS_SECRET_KEY']
+S3_THUMBNAIL_FOLDER = GLOBAL_CONFIG['S3_THUMBNAIL_FOLDER']
 
 #######################
 UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
@@ -31,17 +40,19 @@ UPLOAD_FOLDER = BASE_DIR + 'uploaded_files'
 THUMBNAIL_FOLDER = '/static/thumbnail/designs'
 THUMBNAIL_FULL_DIR = BASE_DIR + 'src/static/thumbnail/designs'
 
+
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 FORMAT_JPEG = 'jpg'
 
+# only one size thumbnail 1024 x 1024 only
 SIZE_CODE_LARGE = 0
-SIZE_CODE_MEDIUM = 1
+# SIZE_CODE_MEDIUM = 1
 
 THUMBNAIL_SIZE_TUPLE_TO_SIZE_CODE = {
-  (1024, 1024): SIZE_CODE_LARGE,
-  (512, 512): SIZE_CODE_MEDIUM
+  (1024, 1024): SIZE_CODE_LARGE
 }
+THUMBNAIL_FILENAME = '1024_by_1024.jpg'
 
 MAX_FILE_SIZE = 16 * 1024 * 1024 # 16MB
 
@@ -65,3 +76,7 @@ CONST_EMAIL_DIGEST_INTERVAL_IN_SECONDS = 3600 * 24 # Send digest email per hour
 zmq_event_host = '0.0.0.0'
 event_pub_port = 8081
 event_sub_port = 8082
+
+JOB_TYPE_S3_UPLOAD_ORIGINAL = 0
+JOB_TYPE_S3_UPLOAD_THUMBNAIL = 1
+JOB_TYPE_EMAIL_UPLOAD_SUCCESS = 2

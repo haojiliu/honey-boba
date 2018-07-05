@@ -70,4 +70,7 @@ export default {
 }
 </script>
 <style strict>
+#confirmEmailButton {
+  border-radius: 0;
+}
 </style>
