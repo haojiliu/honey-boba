@@ -2,7 +2,7 @@
 
 # Create prod docker image:
 docker-compose build prod --no-cache
-docker tag honey-boba_app:latest divid86391/design-review:latest
+docker tag honey-boba_prod:latest divid86391/design-review:latest
 docker push divid86391/design-review
 
 # Create dev docker image:
@@ -14,7 +14,7 @@ docker-compose up -d dev
 - install docker
 - sudo docker login
 - sudo docker pull divid86391/design-review:latest
-- sudo docker run -d -p 80:80 -p 9002:9002 --v /tmp:/srv/vol --name app divid86391/design-review:0.2a
+- sudo docker run -d -p 80:80 -p 9002:9002 -v /tmp:/srv/vol --name app divid86391/design-review:0.2a
 
 - sudo docker run -d -p 5000:5000 -p 9002:9002 --name app honey-boba_dev:latest
 
