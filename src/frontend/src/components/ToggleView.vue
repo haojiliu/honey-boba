@@ -1,6 +1,7 @@
 <template>
   <div>
     <toggle-button
+      v-model="this.$store.state.designs.isMasonry"
       @change="onChangeView"
       :labels="{checked: '', unchecked: ''}"
       switchColor="black"

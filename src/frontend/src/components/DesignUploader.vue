@@ -2,12 +2,12 @@
   <div class="designUploadCard card card-body mx-auto d-block">
     <div v-if="!this.$route.params.uri" class="row d-flex align-items-top">
       <div class="col-12 mb-2">
-        <input v-model="name" v-validate="'alpha_spaces'" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design [Optional]">
+        <input v-model="name" v-validate="" type="text" name="name" class="form-control" placeholder="Enter a name to best describe this design [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('name') }}</small>
       </div>
       <div class="col-12 mb-2">
-        <input v-model="desc" v-validate="'alpha_spaces'" type="text" name="desc" class="form-control" placeholder="Description [Optional]">
+        <input v-model="desc" v-validate="" type="text" name="desc" class="form-control" placeholder="Description [Optional]">
         <!-- <small class="form-text text-muted">Enter a name to best describe this design</small> -->
         <small class="text-danger">{{ errors.first('desc') }}</small>
       </div>

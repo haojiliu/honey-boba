@@ -1,7 +1,0 @@
-BASE_DIR: '/srv/'
-DB_PATH: 'app.db'
-S3_BUCKET: 'anonbeta-dev'
-AWS_REGION: 'us-east-1'
-AWS_ACCESS_KEY: 'AKIAJXJIH4L4I62RPL6A'
-AWS_SECRET_KEY: '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'
-S3_THUMBNAIL_FOLDER: 'https://anonbeta-dev.s3.amazonaws.com/thumbnails'
