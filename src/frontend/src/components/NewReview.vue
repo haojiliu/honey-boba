@@ -2,10 +2,10 @@
   <div>
     <form id="newReview">
       <div class="input-group">
-        <!-- <textarea v-validate="'required|min:6'" name="reviewText" v-model="reviewText" ref="reviewText" class="form-control" rows="1" placeholder="Constructive reviews do the most help!"></textarea> -->
         <textarea-autosize
+          id="newReviewText"
           v-validate="'required|min:10'"
-          name="reviewText"
+          name="review"
           rows="1"
           placeholder="Share your thoughts"
           class="form-control"
@@ -14,15 +14,16 @@
           :max-height="350"
         ></textarea-autosize>
         <div class="input-group-append">
-          <button @click="onSubmit" class="btn btn-outline-dark" type="button">Send</button>
+          <button id="send" @click="onSubmit" class="btn btn-outline-dark" type="button">Send</button>
         </div>
       </div>
-      <small class="text-danger">{{ errors.first('reviewText') }}</small>
+      <small class="text-danger">{{ errors.first('review') }}</small>
     </form>
   </div>
 </template>
 <script>
 import axios from 'axios'
+
 export default {
   props: ['uri'],
   data () {
@@ -49,8 +50,7 @@ export default {
           ).then(function (resp) {
             that.$store.dispatch('designs/refreshOneReview', that.uri)
             that.reviewText = ''
-            console.log(resp.data)
-            console.log('post review succeeded')
+            that.$emit('newReviewPosted', that.uri)
           }).catch(function (resp) {
             console.log('FAILURE!!')
           })
@@ -61,9 +61,11 @@ export default {
 }
 </script>
 <style strict>
-textarea.form-control {
-  border-left: none;
-  border-top: none;
+#newReviewText {
+  border-radius: 0;
+}
+#send {
+  border-radius: 0;
 }
 #newReview {
   padding-top: 5px;

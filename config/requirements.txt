@@ -2,8 +2,10 @@ flask
 requests
 sqlalchemy
 simplejson
-Flask-PyMongo
 uwsgi
 Pillow
 jsonify
 flask-cors
+zmq
+pyyaml
+boto3

@@ -1,7 +1,8 @@
 # Haoji Liu
-import os, sys, datetime, time
+import os, sys, datetime, time, logging
 from PIL import Image
 import constants
+from os.path import exists
 
 def epoch_to_datetime_string(epoch_time):
   return datetime.datetime.fromtimestamp(int(float(epoch_time))).strftime("%Y-%m-%d %H:%M:%S")
@@ -16,9 +17,13 @@ def color_conversion(im):
   return im
 
 def build_thumbnail_filepath(uri, filename):
-  # fdir = os.path.join(constants.THUMBNAIL_FOLDER, uri)
-  # return os.path.join(fdir, filename)
-  return '/api/thumbnail/' + uri
+  fdir = os.path.join(constants.THUMBNAIL_FULL_DIR, uri)
+  fpath = os.path.join(fdir, filename)
+  if exists(fpath):
+    return '/api/thumbnail/' + uri
+  else:
+    s = constants.S3_THUMBNAIL_FOLDER + '/' + uri + '/' + filename
+    return s
 
 def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
   width, height = size_tuple
@@ -27,21 +32,18 @@ def thumbnail(input_filepath, uri, size_tuple, fmt=constants.FORMAT_JPEG):
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_filepath = os.path.join(output_dir, output_filename)
-  print('thumbnailing %s to output %s' % (size_tuple, output_filepath))
+  logging.warning('thumbnailing %s to output %s' % (size_tuple, output_filepath))
   try:
     im = Image.open(input_filepath)
-    print(im.format)
+    logging.warning(im.format)
     im = color_conversion(im)
-    print('image opened!')
     im.thumbnail(size_tuple)
-    print('thumbnail finished!')
-    print(output_filepath)
     im.save(output_filepath, "JPEG")
-    print('saved to jpeg!!')
-    return output_filename
+    logging.warning('saved to jpeg!!')
+    return output_filename, output_filepath
   except IOError:
     raise
-    print("cannot create thumbnail for %s" % input_filepath)
+    logging.warning("cannot create thumbnail for %s" % input_filepath)
 
 def generate_random_string(size):
   return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(size))

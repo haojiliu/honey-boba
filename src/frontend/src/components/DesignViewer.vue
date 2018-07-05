@@ -1,9 +1,12 @@
 <template>
-  <div>
-    <div class="card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
+  <div v-if="this.$store.state.designs.isFetched" class="container-fluid" style="">
+    <div v-if="this.$store.state.designs.isMasonry">
+      <masonry-view v-bind:designsJson="designsJson"></masonry-view>
+    </div>
+    <div v-else class="oneDesign card card-body mx-auto d-block" v-bind:key="designJson.uri" v-for="designJson in designsJson">
       <design-item v-bind:designJson="designJson"></design-item>
-      <review-widget v-bind:reviewsJson="designJson.reviews"></review-widget>
-      <new-review v-bind:uri="designJson.uri"></new-review>
+      <review-widget :ref="'review-'+designJson.uri" v-bind:uri="designJson.uri" v-bind:reviewsJson="designJson.reviews"></review-widget>
+      <new-review v-bind:uri="designJson.uri" @newReviewPosted="onNewReviewPosted"></new-review>
     </div>
   </div>
 </template>
@@ -12,12 +15,28 @@
 import ReviewWidget from './ReviewWidget'
 import NewReview from './NewReview'
 import DesignItem from './DesignItem'
+import MasonryView from './MasonryView'
 
 export default {
   components: {
     ReviewWidget,
     NewReview,
-    DesignItem
+    DesignItem,
+    MasonryView
+  },
+  methods: {
+    onNewReviewPosted (uri) {
+      // scroll page to the new review
+      var reviewEl = this.$refs['review-'+uri][0]
+      // not supported on safari
+      // reviewEl.$el.scrollIntoView({
+      //   behavior: 'smooth',
+      //   block: 'center',
+      //   inline: 'nearest'
+      // });
+      // not supported on firefox
+      reviewEl.$el.scrollIntoViewIfNeeded()
+    },
   },
   computed: {
     designsJson () {
@@ -25,27 +44,19 @@ export default {
     }
   },
   beforeCreate () {
-    console.log('before creating design viewer component')
   },
   created () {
-    console.log('design viewer created')
     if (!this.$store.state.designs.isFetched) {
       this.$store.dispatch('designs/initAllDesigns')
     } else {
-      console.log('already fetched, not making api call to flask')
     }
-  },
-  beforeMount () {
-    console.log('before mount...')
-  },
-  mounted () {
-    console.log('design viewer mounted')
-  },
-  destroyed () {
-    console.log('design viewer destroyed')
-  },
-  beforeDestroy () {
-    console.log('design viewer about to be destroyed')
   }
 }
 </script>
+<style>
+.oneDesign {
+  border: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+</style>

@@ -11,11 +11,7 @@ CREATE TABLE IF NOT EXISTS user(
   updated_at_utc text NOT NULL);
 
 CREATE TABLE IF NOT EXISTS notification(
-  id text PRIMARY KEY NOT NULL,
-  type text,
-  kv_json text NOT NULL,
-  receivers text NOT NULL,
-  sender text NOT NULL,
+  id integer PRIMARY KEY NOT NULL,
   flags integer,
   created_at_utc text NOT NULL,
   updated_at_utc text NOT NULL);
@@ -27,8 +23,15 @@ CREATE TABLE IF NOT EXISTS review_object(
   uid integer,
   filename text NOT NULL,
   description text,
+  name text,
   created_at_utc text NOT NULL,
   updated_at_utc text NOT NULL);
+
+CREATE TABLE IF NOT EXISTS comment(
+  id integer PRIMARY KEY NOT NULL,
+  created_at_utc text NOT NULL,
+  body text NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS review(
   id integer PRIMARY KEY NOT NULL,

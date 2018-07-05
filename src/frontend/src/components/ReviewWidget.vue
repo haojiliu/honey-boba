@@ -29,7 +29,20 @@ export default {
   watch: {
     reviewsJson: function (newVal, oldVal) { // watch it
       // Re-render the reviews
-      console.log('reviewsJson changed!!')
+      // display show more button again if leave a new review when there's 3 reviews already
+      if (this.itemsLoaded === 3) {
+        this.displayShowMoreButton = true
+      } else if (this.itemsLoaded < 3) {
+        this.itemsLoaded += 1
+      } else {
+        // if more than 3 reviews showing and show more button is there
+        if (this.displayShowMoreButton) {
+          // do nothing
+        } else {
+          // if showmore button is not there we are showing all reviews
+          this.itemsLoaded += 1
+        }
+      }
     }
   },
   data () {

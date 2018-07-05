@@ -1,11 +1,18 @@
 version: "3"
 # Author: Haoji Liu
 services:
-  app:
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile_prod
+    container_name: app_prod
+  dev:
     volumes:
       - ./src:/srv/src
-    build: .
-    container_name: design_review
+    build:
+      context: .
+      dockerfile: Dockerfile_dev
+    container_name: app_dev
     ports:
       - "5000:5000" # for app
       - "9002:9002" # for supervisord

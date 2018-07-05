@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Condensed:400,800" rel="stylesheet">
+    <style type="text/css">
+      body {
+        font-family: 'Encode Sans Condensed';
+      }
+      #topBanner {
+        background-color: rgba(235, 152, 37, 0.08);
+        height: 70px;
+      }
+      #secondaryTitle {
+        font-size: 40%;
+      }
+      #titleText {
+        color: rgba(0, 0, 0, 0.79);
+      }
+      .bodyText {
+        color: rgba(0, 0, 0, 0.79);
+      }
+      #secondaryTitle {
+        font-size: 40%;
+      }
+  </style>
+  </head>
+  <body>
+    <div class="col-12 d-flex justify-content-center align-items-center" id="topBanner">
+      <h1 id="titleText">
+        <strong>AnonBeta</strong>
+        <small id="secondaryTitle"class="text-muted">Always Anonymous</small>
+      </h1>
+    </div>
+    <div class="col-12 container-fluid mt-3">
+      <div class="card mb-2">
+        <div class="card-body">
+          {% if name %}
+          <h5 class="bodyText"><strong>{{name}}</strong> is now alive!</h5>
+          {% else %}
+          <h5 class="bodyText">Your design is now alive!</h5>
+          {% endif %}
+          <h5 class="bodyText">You can visit it <a href="https://www.anonbeta.com/uploaded/{{uri}}">here</a> or click on the link below</h5>
+          <h5 class="bodyText"><a href="https://www.anonbeta.com/uploaded/{{uri}}">https://www.anonbeta.com/uploaded/{{uri}}</a></h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 d-flex justify-content-end" id="footer">
+      <small class="text-muted">2018. All Rights Reserved</small>
+    </div>
+  </body>
+</html>

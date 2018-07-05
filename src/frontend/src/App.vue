@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <navigation-bar></navigation-bar>
-    <router-view></router-view>
+    <div id="mainWrapper">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 <script>
@@ -16,14 +18,18 @@ export default {
 
 <style strict>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', 'PT Serif', 'Slabo', 'PT Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+#mainWrapper {
+  margin-top: 50px;
+}
 .card {
   margin: 20px;
   max-width: 800px;
+  padding: 1rem;
 }
 p {
   margin: 0;
@@ -31,7 +37,6 @@ p {
 html {
   font-size: 1rem;
 }
-
 @include media-breakpoint-up(sm) {
   html {
     font-size: 1.2rem;

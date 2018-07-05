@@ -1,4 +1,4 @@
-# honey-boba
+# AnonBeta
 
 > Honey Boba Web App
 
