@@ -26,9 +26,6 @@ export default {
     onClickImg (designJson) {
       var widthVal = '45%'
       // var img = document.getElementById('masonryImg-'+designJson.uri).naturalWidth
-      // console.log(img)
-      // console.log($(img))
-      // console.log($(img).naturalWidth)
       // if (img.naturalWidth > img.naturalHeight) {
       //   widthVal = '65%'
       // }

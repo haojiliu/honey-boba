@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export default {
   getDesigns (cb) {
-    const path = `http://localhost:5000/api/designs`
+    const path = `/api/designs`
     var designsJson = {}
     axios.get(path)
       .then(response => {
@@ -15,7 +15,7 @@ export default {
   },
 
   getOneDesign (cb, uri) {
-    const path = `http://localhost:5000/api/design/` + uri
+    const path = `/api/design/` + uri
     var designJson = {}
     axios.get(path)
       .then(response => {
